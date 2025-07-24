@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText } from "lucide-react"
+import Link from "next/link"
+import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import JobApplicationsPage from "./job-applications/page"
 import BookingPage from "./booking/page"
@@ -65,13 +66,24 @@ export default function TacticalDashboard() {
           {!sidebarCollapsed && (
             <div className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                <span className="text-xs text-white">SYSTEM ONLINE</span>
+                <User className="w-4 h-4 text-white" />
+                <span className="text-xs text-white">USER SETTINGS</span>
               </div>
-              <div className="text-xs text-neutral-500">
-                <div>UPTIME: 72:14:33</div>
-                <div>AGENTS: 847 ACTIVE</div>
-                <div>MISSIONS: 23 ONGOING</div>
+              <div className="space-y-2 mt-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-neutral-400 hover:text-white hover:bg-neutral-700"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Profile</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-neutral-400 hover:text-white hover:bg-neutral-700"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Logout</span>
+                </Button>
               </div>
             </div>
           )}
@@ -98,6 +110,11 @@ export default function TacticalDashboard() {
             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
               <RefreshCw className="w-4 h-4" />
             </Button>
+            <Link href="/login" passHref>
+              <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
+                <LogIn className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
 

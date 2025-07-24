@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
+    // Corrected external API URL
     const externalApiUrl = "https://advacned-tsp.onrender.com/api/services"
     const response = await fetch(externalApiUrl)
 

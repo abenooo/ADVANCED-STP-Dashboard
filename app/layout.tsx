@@ -1,21 +1,33 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: 'Tactical Operations Dashboard',
-  description: 'Tactical command and control system',
+  title: "Service Provider Advanced STP Dashboard",
+  description: "A comprehensive dashboard for managing service provider operations.",
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: {
+  auth, // This is the parallel route slot
+}: Readonly<{
   children: React.ReactNode
-}) {
+  auth: React.ReactNode // Define the type for the auth slot
+}>) {
   return (
-    <html lang="es">
-      <body className="bg-black text-white font-mono antialiased">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          {children}
+          {auth} {/* Render the parallel route slot */}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
