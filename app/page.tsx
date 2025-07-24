@@ -10,10 +10,12 @@ import UserPage from "./user/page"
 import CarrierPage from "./carrier/page"
 import BlogPage from "./blog/page"
 import ServicesPage from "./services/page"
+import { useRouter } from "next/navigation";
 
 export default function TacticalDashboard() {
   const [activeSection, setActiveSection] = useState("services")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const router = useRouter();
 
   return (
     <div className="flex h-screen">
@@ -81,6 +83,10 @@ export default function TacticalDashboard() {
                 </Button>
                 <Button
                   variant="ghost"
+                  onClick={() => {
+                    localStorage.removeItem("token")
+                    router.push("/login")
+                  }}
                   className="w-full justify-start text-neutral-400 hover:text-white hover:bg-neutral-700"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
