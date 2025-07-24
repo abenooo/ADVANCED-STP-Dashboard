@@ -21,50 +21,52 @@ export default function TacticalDashboard() {
       <div
         className={`${sidebarCollapsed ? "w-16" : "w-70"} bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full md:h-auto ${!sidebarCollapsed ? "md:block" : ""}`}
       >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
-              <h1 className="text-orange-500 font-bold text-lg tracking-wider">SERVICE PROVIDER ADVANCED STP</h1>
-              <p className="text-neutral-500 text-xs">v1.0.0</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="text-neutral-400 hover:text-orange-500"
-            >
-              <ChevronRight
-                className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${sidebarCollapsed ? "" : "rotate-180"}`}
-              />
-            </Button>
-          </div>
-
-          <nav className="space-y-2">
-            {[
-              { id: "job-applications", icon: Users, label: "JOB APPLICATIONS" },
-              { id: "booking", icon: Bell, label: "BOOKING" },
-              { id: "user", icon: Users, label: "USER" },
-              { id: "carrier", icon: Users, label: "CARRIER" },
-              { id: "blog", icon: FileText, label: "BLOG" },
-              { id: "services", icon: Settings, label: "SERVICES" },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded transition-colors ${
-                  activeSection === item.id
-                    ? "bg-orange-500 text-white"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800"
-                }`}
+        <div className="flex flex-col h-full justify-between p-4">
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
+                <h1 className="text-orange-500 font-bold text-lg tracking-wider">ADVANCED STP</h1>
+                <p className="text-neutral-500 text-xs">v1.0.0</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="text-neutral-400 hover:text-orange-500"
               >
-                <item.icon className="w-5 h-5 md:w-5 md:h-5 sm:w-6 sm:h-6" />
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-              </button>
-            ))}
-          </nav>
+                <ChevronRight
+                  className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${sidebarCollapsed ? "" : "rotate-180"}`}
+                />
+              </Button>
+            </div>
 
+            <nav className="space-y-2">
+              {[
+                { id: "job-applications", icon: Users, label: "JOB APPLICATIONS" },
+                { id: "booking", icon: Bell, label: "BOOKING" },
+                { id: "user", icon: Users, label: "USER" },
+                { id: "carrier", icon: Users, label: "CARRIER" },
+                { id: "blog", icon: FileText, label: "BLOG" },
+                { id: "services", icon: Settings, label: "SERVICES" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded transition-colors ${
+                    activeSection === item.id
+                      ? "bg-orange-500 text-white"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  }`}
+                >
+                  <item.icon className="w-5 h-5 md:w-5 md:h-5 sm:w-6 sm:h-6" />
+                  {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                </button>
+              ))}
+            </nav>
+          </div>
+          {/* User Settings at the bottom */}
           {!sidebarCollapsed && (
-            <div className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
+            <div className="p-4 bg-neutral-800 border border-neutral-700 rounded mb-2">
               <div className="flex items-center gap-2 mb-2">
                 <User className="w-4 h-4 text-white" />
                 <span className="text-xs text-white">USER SETTINGS</span>
