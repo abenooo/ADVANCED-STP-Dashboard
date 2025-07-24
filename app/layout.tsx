@@ -21,8 +21,8 @@ export default function RootLayout({
   auth: React.ReactNode // Define the type for the auth slot
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en">
+      <body suppressHydrationWarning={true}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
           {auth} {/* Render the parallel route slot */}
