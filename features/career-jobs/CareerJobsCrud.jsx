@@ -6,6 +6,7 @@ import {
   updateCareerJob,
   deleteCareerJob,
 } from "@/lib/api/careerJobs";
+import { Button } from "@/components/ui/button";
 
 export default function CareerJobsCrud() {
   const [jobs, setJobs] = useState([]);
@@ -137,60 +138,64 @@ export default function CareerJobsCrud() {
           )}
         </div>
       </form>
-      <div className="w-full max-w-5xl flex flex-col gap-6">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (
-          <div className="text-gray-300 text-center">Loading...</div>
+          <div className="col-span-full text-gray-300 text-center">Loading...</div>
         ) : jobs.length === 0 ? (
-          <div className="text-gray-400 text-center">No jobs found.</div>
+          <div className="col-span-full text-gray-400 text-center">No jobs found.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {jobs.map(job => (
-              <div
-                key={job._id}
-                className="bg-neutral-800 rounded-2xl shadow p-6 flex flex-col justify-between min-h-[260px]"
-              >
-                {/* Column 1: Title & Slug */}
-                <div>
-                  <div className="text-xl font-bold text-white mb-1">{job.title}</div>
-                  <div className="text-xs text-orange-400 mb-2">Slug: {job.slug}</div>
-                </div>
-                {/* Column 2: Description */}
-                <div className="text-gray-300 mb-2">{job.description}</div>
-                {/* Column 3: Requirements & Dates */}
-                <div className="mb-2">
-                  <div className="font-semibold text-gray-200">Requirements:</div>
-                  <ul className="list-disc list-inside text-gray-400 ml-2 mb-2">
-                    {job.requirements && job.requirements.map((req, idx) => (
-                      <li key={idx}>{req}</li>
-                    ))}
-                  </ul>
-                  <div className="text-xs text-gray-400">
-                    <span className="font-semibold text-gray-300">Posted:</span>{" "}
-                    {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : "-"}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    <span className="font-semibold text-gray-300">Closing:</span>{" "}
-                    {job.closingAt ? new Date(job.closingAt).toLocaleDateString() : "-"}
-                  </div>
-                </div>
-                {/* Column 4: Actions */}
-                <div className="flex gap-4 mt-auto">
-                  <button
-                    className="text-blue-400 hover:underline"
-                    onClick={() => startEdit(job)}
+          jobs.map(job => (
+            <div
+              key={job._id}
+              className="bg-neutral-900 border border-neutral-800 rounded-xl shadow p-6 flex flex-col h-full"
+            >
+              {/* Header: Posted time (dummy for now) */}
+              <div className="text-xs text-gray-400 mb-2">Posted: {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : "N/A"}</div>
+              {/* Title */}
+              <div className="text-2xl font-bold text-white mb-1">{job.title}</div>
+              {/* Slug and Budget (if any) */}
+              <div className="text-sm text-white mb-2">Slug: {job.slug}</div>
+              {/* Description */}
+              <div className="text-white text-base mb-4">{job.description}</div>
+              {/* Requirements as tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {job.requirements && job.requirements.map((req, idx) => (
+                  <span
+                    key={idx}
+                    className="text-white rounded-full px-3 py-1 text-xs"
+                  >
+                    {req}
+                  </span>
+                ))}
+              </div>
+              {/* Dates */}
+              <div className="flex flex-wrap gap-4 text-xs text-gray-400 mb-4">
+                <span>
+                  <span className="font-semibold text-gray-300">Posted:</span>{" "}
+                  {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : "-"}
+                </span>
+                <span>
+                  <span className="font-semibold text-gray-300">Closing:</span>{" "}
+                  {job.closingAt ? new Date(job.closingAt).toLocaleDateString() : "-"}
+                </span>
+              </div>
+              {/* Actions */}
+              <div className="flex gap-3 mt-auto justify-end">
+              <Button
+                    variant="outline"
+                    className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
                   >
                     Edit
-                  </button>
-                  <button
-                    className="text-red-400 hover:underline"
-                    onClick={() => handleDelete(job._id)}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
                   >
                     Delete
-                  </button>
-                </div>
+                  </Button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
       </div>
     </div>
