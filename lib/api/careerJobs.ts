@@ -1,4 +1,4 @@
-const BASE_URL = "https://advacned-tsp.onrender.com/api/career-jobs";
+const BASE_URL = "/api/career-jobs";
 
 export async function getCareerJobs() {
   const res = await fetch(BASE_URL);
