@@ -148,7 +148,7 @@ export default function CareerJobsCrud() {
           jobs.map(job => (
             <Card
               key={job._id}
-              className="border border-neutral-800 bg-neutral-900 rounded-xl shadow p-0 mb-5 flex flex-col h-full transition-colors hover:border-orange-500/50"
+              className="border border-neutral-800 bg-neutral-900  rounded-xl shadow p-0 mb-5 flex flex-col h-full transition-colors hover:border-orange-500/50"
             >
               <CardHeader>
                 <div className="text-xs text-gray-400 mb-2">
@@ -182,7 +182,7 @@ export default function CareerJobsCrud() {
                   </span>
                 </div>
                 {/* Actions */}
-                <div className="flex gap-3 mt-auto justify-end">
+                <div className="flex gap-3 mb-5 justify-end">
                   <Button
                     variant="outline"
                     className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
