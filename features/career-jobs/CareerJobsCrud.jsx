@@ -79,30 +79,53 @@ export default function CareerJobsCrud() {
       </p>
       <form
         onSubmit={editId ? handleUpdate : handleCreate}
-        className="w-full max-w-xl mb-8 bg-neutral-800 rounded-2xl shadow p-6 space-y-3"
+        className="w-full max-w-xl mb-8 bg-neutral-800 rounded-2xl shadow p-8 space-y-6"
       >
-        <input
-          className="border border-neutral-700 bg-neutral-900 text-white rounded px-3 py-2 w-full"
-          placeholder="Title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          required
-        />
-        <textarea
-          className="border border-neutral-700 bg-neutral-900 text-white rounded px-3 py-2 w-full"
-          placeholder="Description"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          required
-        />
+        <div>
+          <h2 className="text-3xl font-extrabold text-orange-500 mb-1">Career Jobs</h2>
+          <p className="text-gray-400 text-base mb-4">
+            Manage your job postings. Add, edit, or remove jobs below.
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="job-title">
+              Title
+            </label>
+            <input
+              id="job-title"
+              className="border border-neutral-700 bg-neutral-900 text-white rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Enter job title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="job-description">
+              Description
+            </label>
+            <textarea
+              id="job-description"
+              className="border border-neutral-700 bg-neutral-900 text-white rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Enter job description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              required
+            />
+          </div>
+        </div>
         <div className="flex gap-2">
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded" type="submit">
+          <button
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded font-semibold transition"
+            type="submit"
+          >
             {editId ? "Update" : "Create"}
           </button>
           {editId && (
             <button
               type="button"
-              className="px-4 py-2 rounded border border-neutral-700 text-gray-300"
+              className="px-6 py-2 rounded border border-neutral-700 text-gray-300 font-semibold transition"
               onClick={() => {
                 setEditId(null);
                 setTitle("");
