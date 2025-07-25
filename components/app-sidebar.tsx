@@ -2,7 +2,7 @@
 
 import type * as React from "react"
 import Link from "next/link"
-import { Briefcase, BookOpen, Calendar, Users, Package, Settings, LogOut, User } from "lucide-react"
+import { Briefcase, BookOpen, Calendar, Users, Package, Settings, LogOut, User, Home } from "lucide-react"
 
 import {
   Sidebar,
@@ -21,6 +21,11 @@ import { SearchForm } from "./search-form"
 
 // Menu items.
 const navItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home, 
+  },
   {
     title: "Job Applications",
     url: "/job-applications",
