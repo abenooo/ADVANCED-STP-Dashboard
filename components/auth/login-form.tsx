@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChromeIcon } from "@/components/icons";
+import adminImage from "@/public/admin.jpg";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -117,11 +118,9 @@ export function LoginForm() {
       <div className="hidden lg:flex w-1/2 items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center">
           <Image
-            src="/placeholder.svg"
+            src={adminImage}
             alt="Login illustration"
-            width={400}
-            height={400}
-            className="object-contain"
+         
           />
         </div>
       </div>
