@@ -73,7 +73,7 @@ export default function CareerJobsCrud() {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-start py-16 px-4">
-      <h2 className="text-4xl font-extrabold text-orange-500 mb-2 text-center">Career Jobs</h2>
+      {/* <h2 className="text-4xl font-extrabold text-orange-500 mb-2 text-center">Career Jobs</h2> */}
       <p className="text-gray-400 text-lg mb-10 text-center">
         Manage your job postings. Add, edit, or remove jobs below.
       </p>
