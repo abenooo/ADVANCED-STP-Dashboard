@@ -137,37 +137,60 @@ export default function CareerJobsCrud() {
           )}
         </div>
       </form>
-      <div className="w-full max-w-2xl flex flex-col gap-6">
+      <div className="w-full max-w-5xl flex flex-col gap-6">
         {loading ? (
           <div className="text-gray-300 text-center">Loading...</div>
         ) : jobs.length === 0 ? (
           <div className="text-gray-400 text-center">No jobs found.</div>
         ) : (
-          jobs.map(job => (
-            <div
-              key={job._id}
-              className="bg-neutral-800 rounded-2xl shadow p-6 flex flex-col md:flex-row md:items-center md:justify-between"
-            >
-              <div>
-                <div className="text-2xl font-bold text-white mb-1">{job.title}</div>
-                <div className="text-gray-300">{job.description}</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {jobs.map(job => (
+              <div
+                key={job._id}
+                className="bg-neutral-800 rounded-2xl shadow p-6 flex flex-col justify-between min-h-[260px]"
+              >
+                {/* Column 1: Title & Slug */}
+                <div>
+                  <div className="text-xl font-bold text-white mb-1">{job.title}</div>
+                  <div className="text-xs text-orange-400 mb-2">Slug: {job.slug}</div>
+                </div>
+                {/* Column 2: Description */}
+                <div className="text-gray-300 mb-2">{job.description}</div>
+                {/* Column 3: Requirements & Dates */}
+                <div className="mb-2">
+                  <div className="font-semibold text-gray-200">Requirements:</div>
+                  <ul className="list-disc list-inside text-gray-400 ml-2 mb-2">
+                    {job.requirements && job.requirements.map((req, idx) => (
+                      <li key={idx}>{req}</li>
+                    ))}
+                  </ul>
+                  <div className="text-xs text-gray-400">
+                    <span className="font-semibold text-gray-300">Posted:</span>{" "}
+                    {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : "-"}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    <span className="font-semibold text-gray-300">Closing:</span>{" "}
+                    {job.closingAt ? new Date(job.closingAt).toLocaleDateString() : "-"}
+                  </div>
+                </div>
+                {/* Column 4: Actions */}
+                <div className="flex gap-4 mt-auto">
+                  <button
+                    className="text-blue-400 hover:underline"
+                    onClick={() => startEdit(job)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="text-red-400 hover:underline"
+                    onClick={() => handleDelete(job._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-4 mt-4 md:mt-0">
-                <button
-                  className="text-blue-400 hover:underline"
-                  onClick={() => startEdit(job)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="text-red-400 hover:underline"
-                  onClick={() => handleDelete(job._id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>
