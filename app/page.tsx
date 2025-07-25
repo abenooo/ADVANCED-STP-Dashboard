@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn } from "lucide-react"
+import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn, Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import JobApplicationsPage from "./job-applications/page"
 import BookingPage from "./booking/page"
@@ -11,11 +10,58 @@ import CarrierPage from "./carrier/page"
 import BlogPage from "./blog/page"
 import ServicesPage from "./services/page"
 import { useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useState } from "react";
+
+const ThemeContext = createContext({
+  theme: "dark",
+  toggleTheme: () => {},
+});
+
+export function useTheme() {
+  return useContext(ThemeContext);
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme");
+    const initialTheme = stored || "dark";
+    setTheme(initialTheme);
+    if (initialTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+    }
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
 
 export default function TacticalDashboard() {
   const [activeSection, setActiveSection] = useState("services")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="flex h-screen">
@@ -112,6 +158,7 @@ export default function TacticalDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-neutral-500">LAST UPDATE: 05/06/2025 20:00 UTC</div>
+       
             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
               <Bell className="w-4 h-4" />
             </Button>
@@ -123,6 +170,15 @@ export default function TacticalDashboard() {
                 <LogIn className="w-4 h-4" />
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-neutral-400 hover:text-orange-500"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
           </div>
         </div>
 
