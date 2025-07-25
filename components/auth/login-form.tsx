@@ -11,10 +11,27 @@ export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Implement your login logic here
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        // Handle error (show message, etc.)
+        alert("Invalid credentials");
+        return;
+      }
+
+      // Optionally, redirect or update UI
+      window.location.href = "/"; // or use router.push("/")
+    } catch (err) {
+      alert("Login failed");
+    }
+  };
 
   return (
     <div className="flex w-full min-h-screen">
