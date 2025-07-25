@@ -141,15 +141,6 @@ export default function ServicesPage() {
           <h1 className="text-2xl font-bold text-white tracking-wider">OUR SERVICES</h1>
           <p className="text-sm text-neutral-400">Explore the range of services we offer.</p>
         </div>
-        <div className="flex gap-2">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">Request a Quote</Button>
-          <Button
-            variant="outline"
-            className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
-          >
-            Contact Sales
-          </Button>
-        </div>
       </div>
 
       {services.map((service) => (
@@ -216,7 +207,13 @@ export default function ServicesPage() {
                     variant="outline"
                     className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
                   >
-                    Learn More
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
+                  >
+                    Delete
                   </Button>
                 </CardContent>
               </Card>
