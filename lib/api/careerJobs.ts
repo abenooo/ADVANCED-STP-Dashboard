@@ -16,7 +16,8 @@ export async function createCareerJob(data: any) {
   return res.json();
 }
 
-export async function updateCareerJob(id: string, data: any) {
+// For update and delete, you need to implement the proxy in your API route as well
+export async function updateCareerJob(id: any, data: any) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -26,7 +27,7 @@ export async function updateCareerJob(id: string, data: any) {
   return res.json();
 }
 
-export async function deleteCareerJob(id: string) {
+export async function deleteCareerJob(id: any) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
