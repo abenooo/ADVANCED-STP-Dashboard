@@ -7,7 +7,7 @@ import {
   deleteBlogPost,
 } from "@/lib/api/blogPosts";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 export default function BlogPostsCrud() {
   const [posts, setPosts] = useState([]);
@@ -28,7 +28,7 @@ export default function BlogPostsCrud() {
       const data = await getBlogPosts();
       setPosts(data);
     } catch (e) {
-      alert("Failed to fetch blog posts");
+      alert("Failed to fetch blog posts: " + (e.message || e));
     }
     setLoading(false);
   }
