@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ChromeIcon } from "@/components/icons"
+import React, { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChromeIcon } from "@/components/icons";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,11 +40,18 @@ export function LoginForm() {
         <div className="mx-auto w-full max-w-sm space-y-6">
           <div>
             <h1 className="text-2xl font-bold">Login to your account</h1>
-            <p className="mt-2 text-sm text-gray-600">Enter your email below to login to your account</p>
+            <p className="mt-2 text-sm text-gray-600">
+              Enter your email below to login to your account
+            </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
               <Input
                 id="email"
                 type="email"
@@ -52,13 +59,23 @@ export function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-transparent"
               />
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-                <Link href="#" className="text-sm text-gray-600 hover:underline">Forgot your password?</Link>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <Link
+                  href="#"
+                  className="text-sm text-gray-600 hover:underline"
+                >
+                  Forgot your password?
+                </Link>
               </div>
               <Input
                 id="password"
@@ -66,23 +83,33 @@ export function LoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-transparent"
               />
             </div>
-            <Button type="submit" className="w-full">Login</Button>
+            <Button
+              type="submit"
+              className="w-full outline bg-black text-white"
+            >
+              Login
+            </Button>
           </form>
           <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-gray-200" />
+            <div className="h-px flex-1 " />
             <span className="text-xs text-gray-400">Or continue with</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
-          <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+          >
             <ChromeIcon className="h-5 w-5" />
             Login with Google
           </Button>
           <p className="text-center text-sm text-gray-600">
-            Reset Password?{" "} 
-            <Link href="#" className="underline">Reset Password</Link>
+            Reset Password?{" "}
+            <Link href="#" className="underline">
+              Reset Password
+            </Link>
           </p>
         </div>
       </div>
@@ -99,5 +126,5 @@ export function LoginForm() {
         </div>
       </div>
     </div>
-  )
+  );
 }
