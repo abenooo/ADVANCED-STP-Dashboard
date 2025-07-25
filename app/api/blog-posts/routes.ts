@@ -1,12 +1,14 @@
+// lib/api/blogPosts.ts
+
 const BASE_URL = "https://advacned-tsp.onrender.com/api/blog-posts";
 
-export async function getBlogPosts() {
+export async function fetchBlogPosts() {
   const res = await fetch(BASE_URL);
   if (!res.ok) throw new Error("Failed to fetch blog posts");
   return res.json();
 }
 
-export async function createBlogPost(data) {
+export async function createBlogPost(data: any) {
   const res = await fetch(BASE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -16,7 +18,7 @@ export async function createBlogPost(data) {
   return res.json();
 }
 
-export async function updateBlogPost(id, data) {
+export async function updateBlogPost(id: string, data: any) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -26,7 +28,7 @@ export async function updateBlogPost(id, data) {
   return res.json();
 }
 
-export async function deleteBlogPost(id) {
+export async function deleteBlogPost(id: string) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
