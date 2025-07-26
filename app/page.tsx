@@ -130,7 +130,7 @@ export default function TacticalDashboard() {
                   variant="ghost"
                   onClick={() => {
                     localStorage.removeItem("token")
-                    router.push("/login")
+                   window.location.href = "/login"
                   }}
                   className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                 >
