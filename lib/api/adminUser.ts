@@ -1,45 +1,78 @@
-const BASE_URL = "/api/user";
+const BASE_URL = "/api/admin-users";
 
-// No client-side token needed; cookies are sent automatically
+// Get token from cookies
+function getToken() {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
+  return match ? match[2] : null;
+}
 
-export async function getAdminUsers() {
-  const res = await fetch(BASE_URL);
+export interface AdminUser {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  password?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  const token = getToken();
+  const res = await fetch(BASE_URL, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
 
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
 }
 
-export async function createAdminUser(data: any) {
+export async function createAdminUser(data: Omit<AdminUser, '_id' | 'createdAt' | 'updatedAt'>) {
+  const token = getToken();
   const res = await fetch(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) throw new Error("Failed to create user");
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || "Failed to create user");
+  }
   return res.json();
 }
 
-export async function updateAdminUser(id: any, data: any) {
+export async function updateAdminUser(id: string, data: Partial<AdminUser>) {
+  const token = getToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) throw new Error("Failed to update user");
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || "Failed to update user");
+  }
   return res.json();
 }
 
-export async function deleteAdminUser(id: any) {
+export async function deleteAdminUser(id: string) {
+  const token = getToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
 
-  if (!res.ok) throw new Error("Failed to delete user");
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || "Failed to delete user");
+  }
   return res.json();
 }
