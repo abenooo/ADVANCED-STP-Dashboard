@@ -1,12 +1,17 @@
-// app/api/career-jobs/route.ts
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
+  // Read token from cookies (supports 'token' or 'access_token')
   const cookieHeader = request.headers.get("cookie") || "";
   const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
-  const token = match ? match[2] : null;
+  let token = match ? match[2] : null;
+  // Fallback to Authorization header from client (e.g., SPA fetch)
+  if (!token) {
+    const auth = request.headers.get("authorization");
+    if (auth && auth.startsWith("Bearer ")) token = auth.slice(7);
+  }
 
-  const res = await fetch("https://advacned-tsp.onrender.com/api/career-jobs", {
+  const res = await fetch("https://advacned-tsp.onrender.com/api/admin-users", {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   const data = await res.json();
@@ -15,7 +20,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const res = await fetch("https://advacned-tsp.onrender.com/api/career-jobs", {
+  const res = await fetch("https://advacned-tsp.onrender.com/api/admin-users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -26,7 +31,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const body = await request.json();
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/career-jobs/${params.id}`, {
+  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -36,7 +41,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/career-jobs/${params.id}`, {
+  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
     method: "DELETE",
   });
   const data = await res.json();

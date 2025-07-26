@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn, Sun, Moon } from "lucide-react"
+import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn, Sun, Moon, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import JobApplicationsPage from "./job-applications/page"
 import BookingPage from "./booking/page"
@@ -12,6 +12,7 @@ import ServicesPage from "./services/page"
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
 import { useState } from "react";
+import Dashboard from "./api/dashboard/page"
 
 export default function TacticalDashboard() {
   const [activeSection, setActiveSection] = useState("services")
@@ -46,6 +47,7 @@ export default function TacticalDashboard() {
 
             <nav className="space-y-2">
               {[
+                { id: "dashboard", icon: LayoutDashboard, label: "DASHBOARD" },
                 { id: "job-applications", icon: Users, label: "JOB APPLICATIONS" },
                 { id: "booking", icon: Bell, label: "BOOKING" },
                 { id: "user", icon: Users, label: "USER" },
@@ -140,12 +142,14 @@ export default function TacticalDashboard() {
 
         {/* Dashboard Content */}
         <div className="flex-1 overflow-auto bg-background">
+          {activeSection === "dashboard" && <Dashboard />}
           {activeSection === "job-applications" && <JobApplicationsPage />}
           {activeSection === "booking" && <BookingPage />}
           {activeSection === "user" && <UserPage />}
           {activeSection === "carrier" && <CarrierPage />}
           {activeSection === "blog" && <BlogPage />}
           {activeSection === "services" && <ServicesPage />}
+          
         </div>
       </div>
     </div>
