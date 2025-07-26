@@ -11,14 +11,24 @@ import ServicesPage from "./services/page"
 import AdminUsersPage from "./admin/users/page"
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
 import Dashboard from "./api/dashboard/page"
 
 export default function TacticalDashboard() {
-  const [activeSection, setActiveSection] = useState("services")
+  const [activeSection, setActiveSection] = useState("dashboard")
+  const searchParams = useSearchParams()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    // Get section from URL query params if it exists
+    const section = searchParams.get('section');
+    if (section) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex h-screen bg-background text-foreground">

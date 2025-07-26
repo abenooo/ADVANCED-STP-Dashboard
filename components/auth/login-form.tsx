@@ -27,8 +27,8 @@ export function LoginForm() {
         return;
       }
 
-      // Optionally, redirect or update UI
-      window.location.href = "/"; // or use router.push("/")
+      // Redirect to dashboard after successful login
+      window.location.href = "/?section=dashboard";
     } catch (err) {
       alert("Login failed");
     }
