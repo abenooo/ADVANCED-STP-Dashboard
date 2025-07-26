@@ -9,6 +9,17 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, X, Calendar, Clock, FileText, Tag } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BlogPost {
   _id: string;
@@ -24,11 +35,18 @@ interface BlogPost {
 export default function BlogPostsCrud() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [slug, setSlug] = useState<string>("");
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    slug: "",
+  });
   const [editId, setEditId] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -51,12 +69,11 @@ export default function BlogPostsCrud() {
     e.preventDefault();
     try {
       const newPost: Omit<BlogPost, '_id'> = { 
-        title, 
-        content, 
-        slug,
+        ...formData,
         publishedAt: new Date().toISOString()
       };
       await createBlogPost(newPost);
+      setIsDialogOpen(false);
       resetForm();
       fetchPosts();
     } catch (e) {
@@ -70,12 +87,11 @@ export default function BlogPostsCrud() {
     if (!editId) return;
     try {
       const updatedPost: Partial<BlogPost> = { 
-        title, 
-        content, 
-        slug,
+        ...formData,
         updatedAt: new Date().toISOString()
       };
       await updateBlogPost(editId, updatedPost);
+      setIsDialogOpen(false);
       resetForm();
       fetchPosts();
     } catch (e) {
@@ -97,18 +113,21 @@ export default function BlogPostsCrud() {
 
   function startEdit(post: BlogPost) {
     setEditId(post._id);
-    setTitle(post.title);
-    setContent(post.content);
-    setSlug(post.slug);
-    setShowModal(true);
+    setFormData({
+      title: post.title,
+      content: post.content,
+      slug: post.slug,
+    });
+    setIsDialogOpen(true);
   }
 
   function resetForm() {
     setEditId(null);
-    setTitle("");
-    setContent("");
-    setSlug("");
-    setShowModal(false);
+    setFormData({
+      title: "",
+      content: "",
+      slug: "",
+    });
   }
 
   return (
@@ -118,60 +137,71 @@ export default function BlogPostsCrud() {
         <p className="text-muted-foreground">Manage all blog posts and content.</p>
       </div>
       
-      {/* Create/Edit Form */}
-      <Card className={`mb-8 ${!showModal ? 'hidden' : ''}`}>
-        <CardHeader>
-          <CardTitle>{editId ? 'Edit Blog Post' : 'Create New Blog Post'}</CardTitle>
-          <CardDescription>
-            {editId ? 'Update the blog post details below' : 'Fill in the details to create a new blog post'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Create/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          resetForm();
+          setEditId(null);
+        }
+        setIsDialogOpen(open);
+      }}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>{editId ? 'Edit Blog Post' : 'Create New Blog Post'}</DialogTitle>
+            <DialogDescription>
+              {editId ? 'Update the blog post details below' : 'Fill in the details to create a new blog post'}
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={editId ? handleUpdate : handleCreate} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="blog-title">
+              <Label htmlFor="title">
                 Title
-              </label>
-              <input
-                id="blog-title"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              </Label>
+              <Input
+                id="title"
+                name="title"
                 placeholder="Enter blog post title"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
+                value={formData.title}
+                onChange={handleInputChange}
                 required
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="blog-slug">
+              <Label htmlFor="slug">
                 Slug
-              </label>
-              <input
-                id="blog-slug"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              </Label>
+              <Input
+                id="slug"
+                name="slug"
                 placeholder="Enter URL-friendly slug"
-                value={slug}
-                onChange={e => setSlug(e.target.value)}
+                value={formData.slug}
+                onChange={handleInputChange}
                 required
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="blog-content">
+              <Label htmlFor="content">
                 Content
-              </label>
-              <textarea
-                id="blog-content"
-                className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              </Label>
+              <Textarea
+                id="content"
+                name="content"
                 placeholder="Write your blog post content here..."
-                value={content}
-                onChange={e => setContent(e.target.value)}
+                value={formData.content}
+                onChange={handleInputChange}
+                className="min-h-[300px]"
                 required
               />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
-                onClick={resetForm}
+                onClick={() => {
+                  resetForm();
+                  setEditId(null);
+                  setIsDialogOpen(false);
+                }}
               >
                 <X className="mr-2 h-4 w-4" />
                 Cancel
@@ -189,10 +219,10 @@ export default function BlogPostsCrud() {
                   </>
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
 
 
 
@@ -207,8 +237,9 @@ export default function BlogPostsCrud() {
           </div>
           <Button
             onClick={() => {
-              setShowModal(true);
               resetForm();
+              setEditId(null);
+              setIsDialogOpen(true);
             }}
             className="w-full sm:w-auto"
           >
@@ -231,8 +262,9 @@ export default function BlogPostsCrud() {
               </p>
               <Button 
                 onClick={() => {
-                  setShowModal(true);
                   resetForm();
+                  setEditId(null);
+                  setIsDialogOpen(true);
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />

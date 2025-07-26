@@ -4,11 +4,11 @@ import Link from "next/link"
 import { ChevronRight, Settings, Users, Bell, RefreshCw, FileText, User, LogOut, LogIn, Sun, Moon, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import JobApplicationsPage from "./job-applications/page"
-import BookingPage from "./booking/page"
-import UserPage from "./user/page"
+import BookingPage from "./booking/page"  
 import CarrierPage from "./carrier/page"
 import BlogPage from "./blog/page"
 import ServicesPage from "./services/page"
+import AdminUsersPage from "./admin/users/page"
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
 import { useState } from "react";
@@ -50,10 +50,10 @@ export default function TacticalDashboard() {
                 { id: "dashboard", icon: LayoutDashboard, label: "DASHBOARD" },
                 { id: "job-applications", icon: Users, label: "JOB APPLICATIONS" },
                 { id: "booking", icon: Bell, label: "BOOKING" },
-                { id: "user", icon: Users, label: "USER" },
                 { id: "carrier", icon: Users, label: "CARRIER" },
                 { id: "blog", icon: FileText, label: "BLOG" },
                 { id: "services", icon: Settings, label: "SERVICES" },
+                { id: "admin-users", icon: User, label: "ADMIN USERS" },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -145,10 +145,10 @@ export default function TacticalDashboard() {
           {activeSection === "dashboard" && <Dashboard />}
           {activeSection === "job-applications" && <JobApplicationsPage />}
           {activeSection === "booking" && <BookingPage />}
-          {activeSection === "user" && <UserPage />}
           {activeSection === "carrier" && <CarrierPage />}
           {activeSection === "blog" && <BlogPage />}
           {activeSection === "services" && <ServicesPage />}
+          {activeSection === "admin-users" && <AdminUsersPage />}
           
         </div>
       </div>

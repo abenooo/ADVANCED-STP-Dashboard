@@ -22,43 +22,40 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
   const res = await fetch(BASE_URL, {
     headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
-
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
 }
 
-export async function createAdminUser(data: Omit<AdminUser, '_id' | 'createdAt' | 'updatedAt'>) {
+export async function createAdminUser(user: Omit<AdminUser, '_id' | 'createdAt' | 'updatedAt'>) {
   const token = getToken();
   const res = await fetch(BASE_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` })
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(user)
   });
-
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Failed to create user");
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to create user');
   }
   return res.json();
 }
 
-export async function updateAdminUser(id: string, data: Partial<AdminUser>) {
+export async function updateAdminUser(id: string, user: Partial<AdminUser>) {
   const token = getToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` })
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(user)
   });
-
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Failed to update user");
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to update user');
   }
   return res.json();
 }
@@ -66,13 +63,12 @@ export async function updateAdminUser(id: string, data: Partial<AdminUser>) {
 export async function deleteAdminUser(id: string) {
   const token = getToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "DELETE",
+    method: 'DELETE',
     headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
-
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Failed to delete user");
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to delete user');
   }
   return res.json();
 }

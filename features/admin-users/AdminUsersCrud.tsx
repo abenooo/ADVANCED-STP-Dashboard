@@ -108,6 +108,14 @@ export default function AdminUsersCrud() {
     setRole(user.role);
   }
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -227,11 +235,7 @@ export default function AdminUsersCrud() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : users.length === 0 ? (
+        {users.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />

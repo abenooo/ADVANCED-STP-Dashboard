@@ -6,11 +6,31 @@ import {
   updateCareerJob,
   deleteCareerJob,
 } from "@/lib/api/careerJobs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, X, Calendar, Briefcase, MapPin, DollarSign, Clock } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type JobType = 'full-time' | 'part-time' | 'contract' | 'internship';
+type JobStatus = 'draft' | 'published' | 'closed';
 
 interface Job {
   _id: string;
@@ -18,6 +38,7 @@ interface Job {
   description: string;
   location?: string;
   salary?: string;
+  status: JobStatus;
   jobType?: JobType;
   postedAt?: string;
   closingAt?: string;
@@ -27,12 +48,27 @@ interface Job {
 export default function CareerJobsCrud() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [salary, setSalary] = useState("");
-  const [jobType, setJobType] = useState("full-time");
+  const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<Omit<Job, '_id' | 'id' | 'postedAt' | 'closingAt'>>({
+    title: "",
+    description: "",
+    location: "",
+    salary: "",
+    jobType: "full-time" as JobType,
+    status: "draft" as JobStatus,
+  });
   const [editId, setEditId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     fetchJobs();
@@ -54,13 +90,10 @@ export default function CareerJobsCrud() {
     e.preventDefault();
     try {
       await createCareerJob({ 
-        title, 
-        description, 
-        location, 
-        salary,
-        jobType: jobType as JobType,
+        ...formData,
         postedAt: new Date().toISOString()
       });
+      setIsDialogOpen(false);
       resetForm();
       await fetchJobs();
     } catch (error) {
@@ -73,13 +106,8 @@ export default function CareerJobsCrud() {
     e.preventDefault();
     if (!editId) return;
     try {
-      await updateCareerJob(editId, { 
-        title, 
-        description, 
-        location, 
-        salary,
-        jobType: jobType as JobType
-      });
+      await updateCareerJob(editId, formData);
+      setIsDialogOpen(false);
       resetForm();
       await fetchJobs();
     } catch (error) {
@@ -101,126 +129,168 @@ export default function CareerJobsCrud() {
 
   function resetForm() {
     setEditId(null);
-    setTitle("");
-    setDescription("");
-    setLocation("");
-    setSalary("");
-    setJobType("full-time");
+    setFormData({
+      title: "",
+      description: "",
+      location: "",
+      salary: "",
+      jobType: "full-time" as JobType,
+      status: "draft" as JobStatus,
+    });
   }
 
-  function startEdit(job: Job) {
+  const handleAddNew = () => {
+    setEditId(null);
+    setFormData({
+      title: "",
+      description: "",
+      location: "",
+      salary: "",
+      jobType: "full-time" as JobType,
+      status: "draft" as JobStatus,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (job: Job) => {
     setEditId(job._id);
-    setTitle(job.title);
-    setDescription(job.description);
-    setLocation(job.location || "");
-    setSalary(job.salary || "");
-    setJobType(job.jobType || "full-time");
-  }
+    setFormData({
+      title: job.title,
+      description: job.description,
+      location: job.location || "",
+      salary: job.salary || "",
+      jobType: job.jobType || "full-time" as JobType,
+      status: job.status || "draft" as JobStatus,
+    });
+    setIsDialogOpen(true);
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Career Jobs</h1>
-        <p className="text-muted-foreground">Manage all career job postings and applications.</p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Career Jobs</h1>
+          <p className="text-sm text-muted-foreground">
+            {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'} found
+          </p>
+        </div>
+        <Button onClick={() => {
+          resetForm();
+          setEditId(null);
+          setIsDialogOpen(true);
+        }}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Job
+        </Button>
       </div>
       
-      {/* Create/Edit Form */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>{editId ? 'Edit Job Posting' : 'Create New Job Posting'}</CardTitle>
-          <CardDescription>
-            {editId ? 'Update the job details below' : 'Fill in the job details to create a new posting'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          resetForm();
+          setEditId(null);
+        }
+        setIsDialogOpen(open);
+      }}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{editId ? 'Edit Job Posting' : 'Create New Job Posting'}</DialogTitle>
+            <DialogDescription>
+              {editId ? 'Update the job details below' : 'Fill in the job details to create a new posting'}
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={editId ? handleUpdate : handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="job-title">
+                <Label htmlFor="title">
                   Job Title
-                </label>
-                <input
-                  id="job-title"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
                   placeholder="e.g. Senior Software Engineer"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
+                  value={formData.title}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="job-location">
+                <Label htmlFor="location">
                   Location
-                </label>
-                <input
-                  id="job-location"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                </Label>
+                <Input
+                  id="location"
+                  name="location"
                   placeholder="e.g. Remote, New York, etc."
-                  value={location}
-                  onChange={e => setLocation(e.target.value)}
+                  value={formData.location}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="job-salary">
+                <Label htmlFor="salary">
                   Salary Range
-                </label>
-                <input
-                  id="job-salary"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                </Label>
+                <Input
+                  id="salary"
+                  name="salary"
                   placeholder="e.g. $80,000 - $120,000"
-                  value={salary}
-                  onChange={e => setSalary(e.target.value)}
+                  value={formData.salary}
+                  onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="job-type">
+                <Label htmlFor="jobType">
                   Job Type
-                </label>
-                <select
-                  id="job-type"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={jobType}
-                  onChange={e => setJobType(e.target.value)}
+                </Label>
+                <Select
+                  value={formData.jobType}
+                  onValueChange={(value) => handleSelectChange('jobType', value)}
                 >
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="internship">Internship</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="job-description">
+              <Label htmlFor="description">
                 Job Description
-              </label>
-              <textarea
-                id="job-description"
-                className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
                 placeholder="Enter detailed job description, responsibilities, and requirements..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleInputChange}
+                className="min-h-[120px]"
                 required
               />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              {editId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setEditId(null);
-                    setTitle("");
-                    setDescription("");
-                    setLocation("");
-                    setSalary("");
-                    setJobType("full-time");
-                  }}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </Button>
-              )}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  resetForm();
+                  setEditId(null);
+                  setIsDialogOpen(false);
+                }}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
               <Button type="submit">
                 {editId ? (
                   <>
@@ -234,137 +304,110 @@ export default function CareerJobsCrud() {
                   </>
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
 
-      {/* Jobs List */}
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground">Job Postings</h2>
-            <p className="text-sm text-muted-foreground">
-              {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'} found
-            </p>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                setEditId(null);
-                setTitle("");
-                setDescription("");
-                setLocation("");
-                setSalary("");
-                setJobType("full-time");
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              New Job
-            </Button>
-          </div>
-        </div>
+      <div className="space-y-4">
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : jobs.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-1">No job postings yet</h3>
-              <p className="text-sm text-muted-foreground">
-                Get started by creating a new job posting.
-              </p>
-              <Button className="mt-4" onClick={() => {
+          <div className="text-center py-12 border rounded-lg">
+            <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-1">No job postings yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get started by creating a new job posting.
+            </p>
+            <Button 
+              onClick={() => {
+                resetForm();
                 setEditId(null);
-                setTitle("");
-                setDescription("");
-                setLocation("");
-                setSalary("");
-                setJobType("full-time");
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Job
-              </Button>
-            </CardContent>
-          </Card>
+                setIsDialogOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create Job
+            </Button>
+          </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job: Job) => (
-              <Card key={job._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-4">
+              <Card key={job._id} className="border-border bg-card hover:border-primary/50 transition-colors shadow-sm hover:shadow-md">
+                <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
-                      <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
-                        <div className="flex items-center">
-                          <Briefcase className="mr-1.5 h-4 w-4" />
-                          {job.jobType || 'Full-time'}
-                        </div>
+                      <CardTitle className="text-foreground">{job.title}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          <Briefcase className="mr-1 h-3 w-3" />
+                          {job.jobType ? job.jobType.replace('-', ' ') : 'Full-time'}
+                        </Badge>
                         {job.location && (
-                          <div className="flex items-center">
-                            <MapPin className="mr-1.5 h-4 w-4" />
+                          <Badge variant="outline" className="text-xs">
+                            <MapPin className="mr-1 h-3 w-3" />
                             {job.location}
-                          </div>
-                        )}
-                        {job.salary && (
-                          <div className="flex items-center">
-                            <DollarSign className="mr-1.5 h-4 w-4" />
-                            {job.salary}
-                          </div>
+                          </Badge>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => startEdit(job)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(job);
+                        }}
                       >
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(job._id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="line-clamp-2 text-sm text-muted-foreground mb-4">
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
                     {job.description}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {job.requirements?.map((req: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      >
-                        {req}
-                      </span>
-                    ))}
-                  </div>
+                  {job.salary && (
+                    <div className="flex items-center text-sm mb-3">
+                      <DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground">{job.salary}</span>
+                    </div>
+                  )}
+                  {job.requirements && job.requirements.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">Requirements:</p>
+                      <ul className="space-y-1">
+                        {job.requirements.slice(0, 3).map((req, idx) => (
+                          <li key={idx} className="flex items-center text-sm">
+                            <span className="h-1 w-1 rounded-full bg-muted-foreground mr-2"></span>
+                            <span className="line-clamp-1">{req}</span>
+                          </li>
+                        ))}
+                        {job.requirements.length > 3 && (
+                          <li className="text-xs text-muted-foreground">
+                            +{job.requirements.length - 3} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
-                <CardFooter className="flex items-center justify-between pt-0 text-sm text-muted-foreground">
+                <CardFooter className="flex items-center justify-between pt-0 text-xs text-muted-foreground">
                   <div className="flex items-center">
-                    <Calendar className="mr-1.5 h-4 w-4" />
-                    Posted {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : 'recently'}
+                    <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                    <span>Posted {job.postedAt ? new Date(job.postedAt).toLocaleDateString() : 'recently'}</span>
                   </div>
                   {job.closingAt && (
                     <div className="flex items-center">
-                      <Clock className="mr-1.5 h-4 w-4" />
-                      Closes {new Date(job.closingAt).toLocaleDateString()}
+                      <Clock className="mr-1.5 h-3.5 w-3.5" />
+                      <span>Closes {new Date(job.closingAt).toLocaleDateString()}</span>
                     </div>
                   )}
                 </CardFooter>
