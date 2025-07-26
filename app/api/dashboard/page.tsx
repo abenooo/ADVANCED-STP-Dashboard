@@ -62,48 +62,55 @@ const Dashboard: React.FC = () => {
   // For internal API routes cookies are sent automatically, so we don't attach headers here.
   const fetchInternal = (url: string) => fetch(url, { cache: "no-store" });
 
-  async function fetchCounts() {
-    setLoading(true);
-    try {
-      const [
-        bookingsRes, 
-        appsRes, 
-        blogsRes, 
-        usersRes, 
-        servicesRes,
-        careerJobsRes
-      ] = await Promise.all([
-        fetchInternal("/api/booking"),
-        fetchInternal("/api/applications"),
-        fetch("/api/blog-posts"),
-        fetchInternal("/api/user"),
-        fetch("/api/services"),
-        fetch("/api/career-jobs"),
-      ]);
+ // Update the fetchCounts function to calculate subservices count
+async function fetchCounts() {
+  setLoading(true);
+  try {
+    const [
+      bookingsRes, 
+      appsRes, 
+      blogsRes, 
+      usersRes, 
+      servicesRes,
+      careerJobsRes
+    ] = await Promise.all([
+      fetchInternal("/api/booking"),
+      fetchInternal("/api/applications"),
+      fetch("/api/blog-posts"),
+      fetchInternal("/api/user"),
+      fetch("/api/services"),
+      fetch("/api/career-jobs"),
+    ]);
 
-      const [
-        bookingsData, 
-        appsData, 
-        blogsData, 
-        usersData, 
-        servicesData,
-        careerJobsData
-      ] = await Promise.all(
-        [bookingsRes, appsRes, blogsRes, usersRes, servicesRes, careerJobsRes].map(async (res) => {
-          if (!res || !res.ok) return [];
-          return res.json();
-        })
-      );
+    const [
+      bookingsData, 
+      appsData, 
+      blogsData, 
+      usersData, 
+      servicesData,
+      careerJobsData
+    ] = await Promise.all(
+      [bookingsRes, appsRes, blogsRes, usersRes, servicesRes, careerJobsRes].map(async (res) => {
+        if (!res || !res.ok) return [];
+        return res.json();
+      })
+    );
 
-      setMetrics({
-        bookings: bookingsData.length || 0,
-        applications: appsData.length || 0,
-        blogs: blogsData.length || 0,
-        users: usersData.length || 0,
-        services: servicesData.length || 0,
-        subservices: 0,  // This is still 0 as per your original code
-        careerJobs: careerJobsData.length || 0,
-      });
+    // Calculate total subservices by summing up subService arrays from all services
+    const totalSubservices = servicesData.reduce(
+      (total: number, service: any) => total + (service.subService?.length || 0), 
+      0
+    );
+
+    setMetrics({
+      bookings: bookingsData.length || 0,
+      applications: appsData.length || 0,
+      blogs: blogsData.length || 0,
+      users: usersData.length || 0,
+      services: servicesData.length || 0,
+      subservices: totalSubservices,  // Now showing actual count of subservices
+      careerJobs: careerJobsData.length || 0,
+    });
   } catch (e) {
     console.error("Failed to fetch dashboard metrics", e);
   }
