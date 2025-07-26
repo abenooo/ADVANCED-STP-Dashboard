@@ -1,6 +1,7 @@
 "use client"
 
 import type * as React from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Briefcase, BookOpen, Calendar, Users, Package, Settings, LogOut, User, Home } from "lucide-react"
 
@@ -59,6 +60,19 @@ const navItems = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter()
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    // Clear token from localStorage or cookies
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token')
+      // Or if you're using cookies:
+      // document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    }
+    // Redirect to login page and force a full page reload
+    window.location.href = '/login'
+  }
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -95,10 +109,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/logout">
+              <div onClick={handleLogout} className="cursor-pointer">
                 <LogOut />
                 <span>Logout</span>
-              </Link>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
