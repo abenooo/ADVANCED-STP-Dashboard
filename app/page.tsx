@@ -22,6 +22,37 @@ export default function TacticalDashboard() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
 
+  // Format section name for display
+  const formatSectionName = (section: string) => {
+    return section
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Get current date and time for the last update
+  const [currentDateTime, setCurrentDateTime] = useState('');
+  
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+      setCurrentDateTime(now.toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(',', '') + ' UTC');
+    };
+    
+    // Update immediately and then every minute
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     // Get section from URL query params if it exists
     const section = searchParams.get('section');
@@ -122,10 +153,12 @@ export default function TacticalDashboard() {
         {/* Top Toolbar */}
         <div className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">SERVICE PROVIDER / DASHBOARD</div>
+            <div className="text-sm text-muted-foreground">
+            ADVANCED STP / {formatSectionName(activeSection)}
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-xs text-muted-foreground">LAST UPDATE: 05/06/2025 20:00 UTC</div>
+            <div className="text-xs text-muted-foreground">LAST UPDATE: {currentDateTime}</div>
        
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-orange-500">
               <Bell className="w-4 h-4" />
