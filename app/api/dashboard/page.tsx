@@ -11,15 +11,53 @@ interface MetricCardProps {
   value: number | string;
   loading?: boolean;
   className?: string;
+  onViewAll?: () => void;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, loading, className }) => {
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, loading, className, onViewAll }) => {
+  // Map card titles to their corresponding section names
+  const sectionMap: Record<string, string> = {
+    'Bookings': 'bookings',
+    'Applications': 'applications',
+    'Blog Posts': 'blog-posts',
+    'Users': 'users',
+    'Services': 'services',
+    'Sub Services': 'sub-services',
+    'Career Jobs': 'career-jobs',
+  };
+
+  const handleViewAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      const section = sectionMap[title];
+      if (section) {
+        window.location.href = `/?section=${section}`;
+      }
+    }
+  };
+
   return (
-    <Card className={cn("p-6 bg-card border-border", className)}>
+    <Card className={cn(
+      "p-6 bg-card border border-border hover:border-orange-500 transition-colors relative group",
+      className
+    )}>
       <CardHeader className="flex flex-col gap-2 p-0">
-        <span className="text-sm text-muted-foreground uppercase tracking-wide font-semibold">
-          {title}
-        </span>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground uppercase tracking-wide font-semibold">
+            {title}
+          </span>
+          {!loading && (
+            <a 
+              href={`/?section=${sectionMap[title] || ''}`}
+              onClick={handleViewAll}
+              className="text-xs text-orange-500 hover:underline hover:text-orange-600 transition-colors"
+            >
+              View All
+            </a>
+          )}
+        </div>
         {loading ? (
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         ) : (
