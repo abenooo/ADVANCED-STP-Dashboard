@@ -24,6 +24,7 @@ export default function TacticalDashboard() {
 
   // Format section name for display
   const formatSectionName = (section: string) => {
+    if (section === 'admin-users') return 'Admin Users';
     return section
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
