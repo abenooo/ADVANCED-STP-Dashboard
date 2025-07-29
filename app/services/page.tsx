@@ -81,6 +81,7 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -141,119 +142,102 @@ export default function ServicesPage() {
     )
   }
 
+  // Find the selected service
+  const selectedService = services.find(s => s._id === selectedServiceId)
+
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">OUR SERVICES</h1>
-          <p className="text-sm text-neutral-400">Explore the range of services we offer.</p>
-        </div>
+      {/* Create Service Button */}
+      <Button className="mb-4" onClick={() => {/* open create service modal */}}>
+        Create Service
+      </Button>
+      {/* List of Services */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {services.map(service => (
+          <Card
+            key={service._id}
+            className={`cursor-pointer bg-white border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700 ${
+              selectedServiceId === service._id ? 'border-orange-500' : ''
+            }`}
+            onClick={() => setSelectedServiceId(service._id)}
+          >
+            <CardHeader>
+              <CardTitle className="text-neutral-900 dark:text-white">{service.name}</CardTitle>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">{service.description}</p>
+            </CardHeader>
+            {/* Service CRUD Buttons */}
+            <div className="flex gap-2 px-4 pb-4">
+              <Button size="sm" onClick={e => {e.stopPropagation(); /* open edit service modal */}}>Edit</Button>
+              <Button size="sm" variant="destructive" onClick={e => {e.stopPropagation(); /* handle delete service */}}>Delete</Button>
+            </div>
+          </Card>
+        ))}
       </div>
 
-      {services.map((service) => (
-        <div key={service._id} className="space-y-6">
-          {/* Main Service Card */}
-          <Card className="bg-neutral-900 border-neutral-700">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-white tracking-wider">{service.name}</CardTitle>
-              <p className="text-sm text-neutral-400">{service.description}</p>
-            </CardHeader>
-            <CardContent>
-              <img
-                src={service.imageUrl || "/placeholder.svg?height=200&width=400&query=service-banner"}
-                alt={service.name}
-                className="w-full h-48 object-cover rounded-md mb-4"
-              />
-              <div className="flex flex-wrap gap-2">
-                {service.name.includes("Cloud") && (
-                  <>
-                    <Badge className="bg-orange-500/20 text-orange-500">Cloud</Badge>
-                    <Badge className="bg-white/20 text-white">Migration</Badge>
-                    <Badge className="bg-neutral-500/20 text-neutral-300">AWS</Badge>
-                    <Badge className="bg-neutral-500/20 text-neutral-300">Azure</Badge>
-                  </>
-                )}
-                {service.name.includes("Cybersecurity") && (
-                  <>
-                    <Badge className="bg-red-500/20 text-red-500">Cybersecurity</Badge>
-                    <Badge className="bg-orange-500/20 text-orange-500">Risk Management</Badge>
-                    <Badge className="bg-neutral-500/20 text-neutral-300">Compliance</Badge>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sub-services Section */}
-          <h2 className="text-xl font-bold text-white tracking-wider mt-8">Our {service.name} Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {service.subServices.map((subService) => (
-              <Card
-                key={subService._id}
-                className="bg-neutral-900 border-neutral-700 hover:border-orange-500/50 transition-colors"
-              >
-                <CardHeader className="pb-3">
+      {/* Sub-services for selected service */}
+      {selectedService && (
+        <div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mt-8 mb-4">
+            {selectedService.name} - Sub Services
+          </h2>
+          <Button className="mb-4" onClick={() => {/* open create sub-service modal */}}>
+            Create Sub-service
+          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {selectedService.subServices.map(subService => (
+              <Card key={subService._id} className="bg-white border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700">
+                <CardHeader>
                   <div className="flex items-center gap-3 mb-4">
                     {getIconForSubService(subService.subServiceName)}
                     <div>
-                      <CardTitle className="text-lg font-bold text-white tracking-wider">
+                      <h3 className="font-semibold text-orange-500 dark:text-orange-400 text-lg mb-1">
                         {subService.subServiceName}
-                      </CardTitle>
-                      <p className="text-sm text-orange-400 italic">"{subService.moto}"</p>
+                      </h3>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-neutral-300">{subService.definition}</p>
-                    <p className="text-sm text-neutral-400">{subService.commitment}</p>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="bg-neutral-800/50 p-4 rounded-md">
-                    <h3 className="font-semibold text-white mb-2">Business Value</h3>
-                    <p className="text-sm text-neutral-300 mb-3">{subService.businessValue.businessValueDefinition}</p>
+                  <div className="bg-neutral-100 dark:bg-neutral-800/50 p-4 rounded-md">
+                    <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">Business Value</h4>
+                    <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-3">{subService.businessValue.businessValueDefinition}</p>
                     <div className="space-y-2">
                       {subService.businessValue.values.map((value) => (
                         <div key={value._id} className="flex items-start gap-2">
                           <span className="text-orange-500 mt-0.5">•</span>
                           <div>
-                            <p className="text-sm font-medium text-white">{value.title}</p>
-                            <p className="text-xs text-neutral-400">{value.description}</p>
+                            <p className="text-sm font-medium text-neutral-900 dark:text-white">{value.title}</p>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{value.description}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
-                  <div className="bg-neutral-800/50 p-4 rounded-md">
-                    <h3 className="font-semibold text-white mb-2">Organizational Needs</h3>
-                    <p className="text-sm text-neutral-300 mb-3">{subService.organizationNeed.organizationalDefinition}</p>
+                  <div className="bg-neutral-100 dark:bg-neutral-800/50 p-4 rounded-md">
+                    <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">Organizational Needs</h4>
+                    <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-3">{subService.organizationNeed.organizationalDefinition}</p>
                     <div className="space-y-2">
                       {subService.organizationNeed.needs.map((need) => (
                         <div key={need._id} className="flex items-start gap-2">
                           <span className="text-orange-500 mt-0.5">•</span>
                           <div>
-                            <p className="text-sm font-medium text-white">{need.title}</p>
-                            <p className="text-xs text-neutral-400">{need.description}</p>
+                            <p className="text-sm font-medium text-neutral-900 dark:text-white">{need.title}</p>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{need.description}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
-                  <div className="bg-orange-500/10 p-4 rounded-md border border-orange-500/30">
-                    <h3 className="font-semibold text-orange-400">{subService.cta.title}</h3>
-                    <p className="text-sm text-orange-300">{subService.cta.description}</p>
-                    <Button className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white">
-                      Get Started
-                    </Button>
+                  {/* CRUD Buttons */}
+                  <div className="flex gap-2 mt-4">
+                    <Button size="sm" onClick={() => {/* open edit sub-service modal */}}>Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={() => {/* handle delete sub-service */}}>Delete</Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
-      ))}
+      )}
     </div>
   )
 }
