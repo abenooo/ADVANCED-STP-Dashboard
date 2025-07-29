@@ -113,79 +113,113 @@ const Dashboard: React.FC = () => {
   // For internal API routes cookies are sent automatically, so we don't attach headers here.
   const fetchInternal = (url: string) => fetch(url, { cache: "no-store" });
 
- // Update the fetchCounts function to calculate subservices count
-async function fetchCounts() {
-  setLoading(true);
-  try {
-    const [
-      bookingsRes, 
-      appsRes, 
-      blogsRes, 
-      usersRes, 
-      servicesRes,
-      careerJobsRes
-    ] = await Promise.all([
-      fetchInternal("/api/booking"),
-      fetchInternal("/api/applications"),
-      fetch("/api/blog-posts"),
-      fetchInternal("/api/user"),
-      fetch("/api/services"),
-      fetch("/api/career-jobs"),
-    ]);
+  // Update the fetchCounts function to properly handle API responses
+  async function fetchCounts() {
+    setLoading(true);
+    try {
+      // Make parallel API calls
+      const [
+        bookingsRes, 
+        appsRes, 
+        blogsRes, 
+        usersRes, 
+        servicesRes,
+        careerJobsRes
+      ] = await Promise.all([
+        fetchInternal("/api/booking"),
+        fetchInternal("/api/applications"),
+        fetch("/api/blog-posts"),
+        fetchInternal("/api/user"),
+        fetch("/api/services"),
+        fetch("/api/career-jobs"),
+      ]);
 
-    const [
-      bookingsData, 
-      appsData, 
-      blogsData, 
-      usersData, 
-      servicesData,
-      careerJobsData
-    ] = await Promise.all(
-      [bookingsRes, appsRes, blogsRes, usersRes, servicesRes, careerJobsRes].map(async (res) => {
-        if (!res || !res.ok) return [];
-        return res.json();
-      })
-    );
+      // Check if responses are ok and parse JSON
+      const parseResponse = async (res: Response) => {
+        if (!res.ok) {
+          console.error(`Failed to fetch: ${res.status} ${res.statusText}`);
+          return [];
+        }
+        try {
+          const data = await res.json();
+          return Array.isArray(data) ? data : [data];
+        } catch (e) {
+          console.error('Error parsing JSON:', e);
+          return [];
+        }
+      };
 
-    // Calculate total subservices by summing up subService arrays from all services
-    const totalSubservices = servicesData.reduce(
-      (total: number, service: any) => total + (service.subService?.length || 0), 
-      0
-    );
+      // Parse all responses
+      const [
+        bookingsData, 
+        appsData, 
+        blogsData, 
+        usersData, 
+        servicesData,
+        careerJobsData
+      ] = await Promise.all([
+        parseResponse(bookingsRes),
+        parseResponse(appsRes),
+        parseResponse(blogsRes),
+        parseResponse(usersRes),
+        parseResponse(servicesRes),
+        parseResponse(careerJobsRes)
+      ]);
 
-    // Calculate user metrics by role
-    const userMetrics = usersData.reduce((acc: any, user: any) => {
-      const role = user.role?.toLowerCase() || 'user';
-      acc[role] = (acc[role] || 0) + 1;
-      acc.total = (acc.total || 0) + 1;
-      return acc;
-    }, { total: 0, admin: 0, staff: 0, user: 0 });
+      console.log('Dashboard Data:', {
+        bookings: bookingsData.length,
+        applications: appsData.length,
+        blogs: blogsData.length,
+        users: usersData.length,
+        services: servicesData.length,
+        careerJobs: careerJobsData.length
+      });
 
-    setMetrics({
-      bookings: bookingsData.length || 0,
-      applications: appsData.length || 0,
-      blogs: blogsData.length || 0,
-      users: {
-        total: userMetrics.total,
-        admin: userMetrics.admin || 0,
-        staff: userMetrics.staff || 0,
-        user: userMetrics.user || 0,
-        ...Object.entries(userMetrics)
-          .filter(([key]) => !['total', 'admin', 'staff', 'user'].includes(key))
-          .reduce((acc, [key, value]) => ({
-            ...acc,
-            [key]: value
-          }), {})
-      },
-      services: servicesData.length || 0,
-      subservices: totalSubservices,
-      careerJobs: careerJobsData.length || 0,
-    });
-  } catch (e) {
-    console.error("Failed to fetch dashboard metrics", e);
+      // Calculate total subservices by summing up subService arrays from all services
+      const totalSubservices = servicesData.reduce(
+        (total: number, service: any) => {
+          const subServices = service.subService || [];
+          return total + (Array.isArray(subServices) ? subServices.length : 0);
+        }, 
+        0
+      );
+
+      // Calculate user metrics by role
+      const userMetrics = usersData.reduce((acc: any, user: any) => {
+        if (!user) return acc;
+        const role = (user.role || 'user').toLowerCase();
+        acc[role] = (acc[role] || 0) + 1;
+        acc.total = (acc.total || 0) + 1;
+        return acc;
+      }, { total: 0, admin: 0, staff: 0, user: 0 });
+
+      // Update metrics state
+      setMetrics({
+        bookings: bookingsData.length,
+        applications: appsData.length,
+        blogs: blogsData.length,
+        users: {
+          total: userMetrics.total,
+          admin: userMetrics.admin || 0,
+          staff: userMetrics.staff || 0,
+          user: userMetrics.user || 0,
+          ...Object.entries(userMetrics)
+            .filter(([key]) => !['total', 'admin', 'staff', 'user'].includes(key))
+            .reduce((acc, [key, value]) => ({
+              ...acc,
+              [key]: value
+            }), {})
+        },
+        services: servicesData.length,
+        subservices: totalSubservices,
+        careerJobs: careerJobsData.length,
+      });
+    } catch (e) {
+      console.error("Failed to fetch dashboard metrics", e);
+    } finally {
+      setLoading(false);
+    }
   }
-  setLoading(false);
-}
   return (
     <div className="w-full p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <MetricCard title="Bookings" value={metrics.bookings} loading={loading} />
