@@ -17,13 +17,13 @@ interface MetricCardProps {
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, loading, className, onViewAll }) => {
   // Map card titles to their corresponding section names
   const sectionMap: Record<string, string> = {
-    'Bookings': 'bookings',
-    'Applications': 'applications',
-    'Blog Posts': 'blog-posts',
-    'Users': 'users',
+    'Bookings': 'booking',
+    'Applications': 'job-applications',
+    'Blog Posts': 'blog',
+    'Users': 'admin-users',
     'Services': 'services',
-    'Sub Services': 'sub-services',
-    'Career Jobs': 'career-jobs',
+    'Sub Services': 'services', // Assuming sub-services are under services
+    'Career Jobs': 'carrier',
   };
 
   const handleViewAll = (e: React.MouseEvent) => {
@@ -248,7 +248,7 @@ const Dashboard: React.FC = () => {
               Users
             </span>
             <a 
-              href="/?section=users"
+              href="/?section=admin-users"
               className="text-xs text-orange-500 hover:underline hover:text-orange-600 transition-colors"
             >
               View All

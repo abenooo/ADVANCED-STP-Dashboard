@@ -155,7 +155,7 @@ export default function TacticalDashboard() {
         <div className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
-            ADVANCED STP / {formatSectionName(activeSection)}
+              ADMIN USERS
             </div>
           </div>
           <div className="flex items-center gap-4">
