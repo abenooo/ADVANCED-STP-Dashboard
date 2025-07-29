@@ -1,37 +1,54 @@
-// lib/api/blogPosts.ts
 const BASE_URL = "/api/blog-posts";
 
+// Get auth token from localStorage
+const getAuthToken = () => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('token');
+};
+
 export async function getBlogPosts() {
-  const res = await fetch(BASE_URL);
+  const res = await fetch(BASE_URL, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch blog posts");
   return res.json();
 }
 
 export async function createBlogPost(data: any) {
+  const token = getAuthToken();
   const res = await fetch(BASE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create blog post");
-  return res.json();
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Failed to create blog post');
+  return result;
 }
 
-// For update and delete, you need to implement the proxy in your API route as well
-export async function updateBlogPost(id: any, data: any) {
+export async function updateBlogPost(id: string, data: any) {
+  const token = getAuthToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update blog post");
-  return res.json();
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Failed to update blog post');
+  return result;
 }
 
-export async function deleteBlogPost(id: any) {
+export async function deleteBlogPost(id: string) {
+  const token = getAuthToken();
   const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "DELETE",
+    method: 'DELETE',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
   });
-  if (!res.ok) throw new Error("Failed to delete blog post");
-  return res.json();
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Failed to delete blog post');
+  return result;
 }
