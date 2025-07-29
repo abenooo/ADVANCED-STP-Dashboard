@@ -26,19 +26,28 @@ interface BlogPost {
   title: string;
   content: string;
   slug: string;
+  coverImageUrl?: string;
+  tags?: string[];
+  published?: boolean;
   publishedAt?: string;
   updatedAt?: string;
   createdAt?: string;
-  tags?: string[];
+  __v?: number;
 }
 
 export default function BlogPostsCrud() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    content: string;
+    slug: string;
+    tags?: string[];
+  }>({
     title: "",
     content: "",
     slug: "",
+    tags: []
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,10 +64,14 @@ export default function BlogPostsCrud() {
   async function fetchPosts() {
     setLoading(true);
     try {
-      const data: BlogPost[] = await getBlogPosts();
-      setBlogPosts(data);
+      const response = await getBlogPosts();
+      // Handle both array and single object responses
+      console.log('API Response:', response); // Debug log
+      const posts = Array.isArray(response) ? response : [response];
+      setBlogPosts(posts);
     } catch (e) {
       const error = e as Error;
+      console.error('Error fetching blog posts:', error);
       alert("Failed to fetch blog posts: " + (error.message || String(e)));
     } finally {
       setLoading(false);
@@ -70,15 +83,18 @@ export default function BlogPostsCrud() {
     try {
       const newPost: Omit<BlogPost, '_id'> = { 
         ...formData,
-        publishedAt: new Date().toISOString()
+        published: true,
+        publishedAt: new Date().toISOString(),
+        tags: formData.tags || []
       };
-      await createBlogPost(newPost);
+      const response = await createBlogPost(newPost);
+      console.log('Create response:', response); // Debug log
       setIsDialogOpen(false);
       resetForm();
       fetchPosts();
     } catch (e) {
       console.error("Create error:", e);
-      alert("Failed to create blog post");
+      alert("Failed to create blog post: " + (e instanceof Error ? e.message : 'Unknown error'));
     }
   }
 
@@ -117,6 +133,7 @@ export default function BlogPostsCrud() {
       title: post.title,
       content: post.content,
       slug: post.slug,
+      ...(post.tags && { tags: post.tags })
     });
     setIsDialogOpen(true);
   }
@@ -127,6 +144,7 @@ export default function BlogPostsCrud() {
       title: "",
       content: "",
       slug: "",
+      tags: []
     });
   }
 
