@@ -23,12 +23,44 @@ import {
   FileText,
 } from "lucide-react"
 
-interface SubService {
+interface Need {
   _id: string
   title: string
   description: string
-  heading: string
-  image: string
+}
+
+interface Value {
+  _id: string
+  title: string
+  description: string
+}
+
+interface CTA {
+  _id: string
+  title: string
+  description: string
+}
+
+interface BusinessValue {
+  businessValueDefinition: string
+  values: Value[]
+}
+
+interface OrganizationNeed {
+  organizationalDefinition: string
+  needs: Need[]
+}
+
+interface SubService {
+  _id: string
+  subServiceName: string
+  slug: string
+  moto: string
+  definition: string
+  commitment: string
+  organizationNeed: OrganizationNeed
+  businessValue: BusinessValue
+  cta: CTA
 }
 
 interface Service {
@@ -36,8 +68,10 @@ interface Service {
   name: string
   slug: string
   description: string
+  moto: string
   imageUrl: string
-  subService: SubService[]
+  icon: string
+  subServices: SubService[]
   __v: number
   createdAt: string
   updatedAt: string
@@ -68,42 +102,16 @@ export default function ServicesPage() {
     fetchServices()
   }, [])
 
-  const getIconForSubService = (heading: string) => {
-    switch (heading) {
-      case "Cloud Readiness":
-        return <Cloud className="w-5 h-5 text-orange-500" />
-      case "Cloud Architecture":
-        return <Server className="w-5 h-5 text-orange-500" />
-      case "Cloud Migration":
+  const getIconForSubService = (subServiceName: string) => {
+    switch (subServiceName.toLowerCase()) {
+      case 'cloud migration':
         return <Database className="w-5 h-5 text-orange-500" />
-      case "Cost Optimization":
-        return <DollarSign className="w-5 h-5 text-orange-500" />
-      case "Multi-cloud Strategy":
+      case 'cloud storage':
+        return <Server className="w-5 h-5 text-orange-500" />
+      case 'multi-cloud strategy':
         return <Globe className="w-5 h-5 text-orange-500" />
-      case "Cloud Management":
+      case 'cloud security':
         return <Shield className="w-5 h-5 text-orange-500" />
-      case "Cloud Connectivity":
-        return <Zap className="w-5 h-5 text-orange-500" />
-      case "SaaS Integration":
-        return <Code className="w-5 h-5 text-orange-500" />
-      case "CI/CD Pipeline":
-        return <Activity className="w-5 h-5 text-orange-500" />
-      case "Security Audits":
-        return <AlertTriangle className="w-5 h-5 text-orange-500" />
-      case "Firewall & IDS/IPS":
-        return <Lock className="w-5 h-5 text-orange-500" />
-      case "Endpoint Protection":
-        return <Shield className="w-5 h-5 text-orange-500" />
-      case "IAM":
-        return <Fingerprint className="w-5 h-5 text-orange-500" />
-      case "Compliance":
-        return <FileText className="w-5 h-5 text-orange-500" />
-      case "Security Training":
-        return <GraduationCap className="w-5 h-5 text-orange-500" />
-      case "SSO & IAM":
-        return <Key className="w-5 h-5 text-orange-500" />
-      case "MFA & VPN":
-        return <Network className="w-5 h-5 text-orange-500" />
       default:
         return <Cloud className="w-5 h-5 text-orange-500" />
     }
@@ -178,43 +186,68 @@ export default function ServicesPage() {
           </Card>
 
           {/* Sub-services Section */}
-          <h2 className="text-xl font-bold text-white tracking-wider mt-8">Sub-Services for {service.name}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {service.subService.map((subService) => (
+          <h2 className="text-xl font-bold text-white tracking-wider mt-8">Our {service.name} Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {service.subServices.map((subService) => (
               <Card
                 key={subService._id}
                 className="bg-neutral-900 border-neutral-700 hover:border-orange-500/50 transition-colors"
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    {getIconForSubService(subService.heading)}
+                  <div className="flex items-center gap-3 mb-4">
+                    {getIconForSubService(subService.subServiceName)}
                     <div>
-                      <CardTitle className="text-sm font-bold text-white tracking-wider">
-                        {subService.heading}
+                      <CardTitle className="text-lg font-bold text-white tracking-wider">
+                        {subService.subServiceName}
                       </CardTitle>
-                      <p className="text-xs text-neutral-400">{subService.title}</p>
+                      <p className="text-sm text-orange-400 italic">"{subService.moto}"</p>
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-neutral-300">{subService.definition}</p>
+                    <p className="text-sm text-neutral-400">{subService.commitment}</p>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <img
-                    src={subService.image || "/placeholder.svg?height=100&width=100&query=subservice-icon"}
-                    alt={subService.title}
-                    className="w-full h-32 object-cover rounded-md mb-3"
-                  />
-                  <p className="text-sm text-neutral-300">{subService.description}</p>
-                  <Button
-                    variant="outline"
-                    className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="mt-4 w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
-                  >
-                    Delete
-                  </Button>
+                <CardContent className="space-y-4">
+                  <div className="bg-neutral-800/50 p-4 rounded-md">
+                    <h3 className="font-semibold text-white mb-2">Business Value</h3>
+                    <p className="text-sm text-neutral-300 mb-3">{subService.businessValue.businessValueDefinition}</p>
+                    <div className="space-y-2">
+                      {subService.businessValue.values.map((value) => (
+                        <div key={value._id} className="flex items-start gap-2">
+                          <span className="text-orange-500 mt-0.5">•</span>
+                          <div>
+                            <p className="text-sm font-medium text-white">{value.title}</p>
+                            <p className="text-xs text-neutral-400">{value.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-neutral-800/50 p-4 rounded-md">
+                    <h3 className="font-semibold text-white mb-2">Organizational Needs</h3>
+                    <p className="text-sm text-neutral-300 mb-3">{subService.organizationNeed.organizationalDefinition}</p>
+                    <div className="space-y-2">
+                      {subService.organizationNeed.needs.map((need) => (
+                        <div key={need._id} className="flex items-start gap-2">
+                          <span className="text-orange-500 mt-0.5">•</span>
+                          <div>
+                            <p className="text-sm font-medium text-white">{need.title}</p>
+                            <p className="text-xs text-neutral-400">{need.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-orange-500/10 p-4 rounded-md border border-orange-500/30">
+                    <h3 className="font-semibold text-orange-400">{subService.cta.title}</h3>
+                    <p className="text-sm text-orange-300">{subService.cta.description}</p>
+                    <Button className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white">
+                      Get Started
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
