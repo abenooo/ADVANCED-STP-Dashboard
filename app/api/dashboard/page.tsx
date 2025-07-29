@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
         parseResponse(bookingsRes),
         parseResponse(appsRes),
         parseResponse(blogsRes),
-        parseResponse(usersRes),
+        usersRes.json().then(data => data.data || []), // Extract users from data property
         parseResponse(servicesRes),
         parseResponse(careerJobsRes)
       ]);
@@ -187,11 +187,27 @@ const Dashboard: React.FC = () => {
       // Calculate user metrics by role
       const userMetrics = usersData.reduce((acc: any, user: any) => {
         if (!user) return acc;
+        
+        // Get the role and create a display-friendly version
         const role = (user.role || 'user').toLowerCase();
-        acc[role] = (acc[role] || 0) + 1;
-        acc.total = (acc.total || 0) + 1;
+        const displayRole = role.replace('_', ' ');
+        
+        // Initialize role counter if it doesn't exist
+        if (!acc[role]) {
+          acc[role] = 0;
+        }
+        
+        // Increment role counter and total
+        acc[role]++;
+        acc.total++;
+        
         return acc;
-      }, { total: 0, admin: 0, staff: 0, user: 0 });
+      }, { total: 0 });
+      
+      // Add display names for roles with underscores
+      if (userMetrics['super_admin']) {
+        userMetrics['super admin'] = userMetrics['super_admin'];
+      }
 
       // Update metrics state
       setMetrics({
@@ -247,15 +263,34 @@ const Dashboard: React.FC = () => {
                 <span className="text-xs text-muted-foreground">Total Users</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                {Object.entries(metrics.users).map(([key, value]) => {
-                  if (key === 'total') return null;
-                  return (
-                    <div key={key} className="flex justify-between">
-                      <span className="capitalize">{key}:</span>
-                      <span className="font-medium">{value as number}</span>
-                    </div>
-                  );
-                })}
+                {Object.entries(metrics.users)
+                  .filter(([key, value]) => {
+                    // Skip total and roles with zero count
+                    return key !== 'total' && value > 0;
+                  })
+                  .sort(([roleA], [roleB]) => {
+                    // Custom sort to put admin and super admin first
+                    const order: Record<string, number> = {
+                      'super admin': 1,
+                      'admin': 2,
+                      'marketing': 3,
+                      'staff': 4,
+                      'user': 999
+                    };
+                    return (order[roleA] || 99) - (order[roleB] || 99) || roleA.localeCompare(roleB);
+                  })
+                  .map(([key, value]) => {
+                    // Skip the raw role key if we have a display version
+                    if (key === 'super_admin' && metrics.users['super admin'] !== undefined) {
+                      return null;
+                    }
+                    return (
+                      <div key={key} className="flex justify-between">
+                        <span className="capitalize">{key.replace('_', ' ')}:</span>
+                        <span className="font-medium">{value as number}</span>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}

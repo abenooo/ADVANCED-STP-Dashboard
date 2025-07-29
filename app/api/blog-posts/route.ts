@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const API_BASE_URL = "https://advacned-tsp.onrender.com/api/blog-posts";
+const API_BASE_URL = `${process.env.Base_Url}/blog-posts`
 
 // Public route - no authentication required
 export async function GET() {
