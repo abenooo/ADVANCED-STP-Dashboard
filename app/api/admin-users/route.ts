@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const backendUrl = "https://advanced-tsp.onrender.com/api/admin-users";
+  const backendUrl = "https://advacned-tsp.onrender.com/api/admin-users";
   console.log('Making request to backend URL:', backendUrl);
   
   try {
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   const token = match ? match[2] : null;
   
   const body = await request.json();
-  const res = await fetch("https://advanced-tsp.onrender.com/api/admin-users", {
+  const res = await fetch("https://advacned-tsp.onrender.com/api/admin-users", {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const token = match ? match[2] : null;
   
   const body = await request.json();
-  const res = await fetch(`https://advanced-tsp.onrender.com/api/admin-users/${params.id}`, {
+  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
     method: "PUT",
     headers: { 
       "Content-Type": "application/json",
@@ -97,7 +97,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
   const token = match ? match[2] : null;
   
-  const res = await fetch(`https://advanced-tsp.onrender.com/api/admin-users/${params.id}`, {
+  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
     method: "DELETE",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
