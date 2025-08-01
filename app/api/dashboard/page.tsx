@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -132,13 +131,17 @@ const Dashboard: React.FC = () => {
       ]);
 
       // Check if responses are ok and parse JSON
-      const parseResponse = async (res: Response) => {
+      const parseResponse = async (res: Response, isServices = false) => {
         if (!res.ok) {
           console.error(`Failed to fetch: ${res.status} ${res.statusText}`);
           return [];
         }
         try {
           const data = await res.json();
+          // Handle services response which might be nested in a data property
+          if (isServices) {
+            return Array.isArray(data) ? data : (data.data || []);
+          }
           return Array.isArray(data) ? data : [data];
         } catch (e) {
           console.error('Error parsing JSON:', e);
@@ -159,7 +162,7 @@ const Dashboard: React.FC = () => {
         parseResponse(appsRes),
         parseResponse(blogsRes),
         usersRes.json().then(data => data.data || []), // Extract users from data property
-        parseResponse(servicesRes),
+        parseResponse(servicesRes, true), // Pass true to handle services response
         parseResponse(careerJobsRes)
       ]);
 
@@ -169,7 +172,8 @@ const Dashboard: React.FC = () => {
         blogs: blogsData.length,
         users: usersData.length,
         services: servicesData.length,
-        careerJobs: careerJobsData.length
+        careerJobs: careerJobsData.length,
+        servicesData // Log the actual services data for debugging
       });
 
       // Calculate total subservices by summing up subService arrays from all services
