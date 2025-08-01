@@ -17,13 +17,12 @@ interface MetricCardProps {
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, loading, className, onViewAll }) => {
   // Map card titles to their corresponding section names
   const sectionMap: Record<string, string> = {
-    'Bookings': 'booking',
     'Applications': 'job-applications',
-    'Blog Posts': 'blog',
-    'Users': 'admin-users',
-    'Services': 'services',
-    'Sub Services': 'services', // Assuming sub-services are under services
+    'Bookings': 'booking',
     'Career Jobs': 'carrier',
+    'Blog Posts': 'blog',
+    'Services': 'services',
+    'Users': 'admin-users',
   };
 
   const handleViewAll = (e: React.MouseEvent) => {
@@ -82,7 +81,6 @@ interface DashboardMetrics {
   blogs: number;
   users: UserMetrics;
   services: number;
-  subservices: number;
   careerJobs: number;
 }
 
@@ -98,7 +96,6 @@ const Dashboard: React.FC = () => {
       user: 0
     },
     services: 0,
-    subservices: 0,
     careerJobs: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -227,7 +224,6 @@ const Dashboard: React.FC = () => {
             }), {})
         },
         services: servicesData.length,
-        subservices: totalSubservices,
         careerJobs: careerJobsData.length,
       });
     } catch (e) {
@@ -297,7 +293,6 @@ const Dashboard: React.FC = () => {
         </CardHeader>
       </Card>
       <MetricCard title="Services" value={metrics.services} loading={loading} />
-      <MetricCard title="Sub Services" value={metrics.subservices} loading={loading} />
       <MetricCard title="Career Jobs" value={metrics.careerJobs} loading={loading} />
     </div>
   );
