@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-const API_BASE_URL = "https://advacned-tsp.onrender.com/api/services"
+const API_BASE_URL = "https://advanced-tsp.onrender.com/api/services"
 
 // Helper function to extract token from request
 function getAuthToken(request: Request): string | null {
