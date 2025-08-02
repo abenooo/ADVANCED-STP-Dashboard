@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for better production performance
-  experimental: {
-    serverComponentsExternalPackages: ['resend'],
-  },
+  // External packages for server components (Next.js 15+)
+  serverExternalPackages: ['resend'],
   
   // Environment variables that should be available on the client side
   env: {

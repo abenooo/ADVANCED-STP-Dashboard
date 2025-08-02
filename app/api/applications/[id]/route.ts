@@ -20,8 +20,9 @@ function getAuthToken(request: Request): string | null {
 // PUT - Update application
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const token = getAuthToken(request);
   
   if (!token) {
@@ -74,8 +75,9 @@ export async function PUT(
 // DELETE - Delete application
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const token = getAuthToken(request);
   
   if (!token) {
