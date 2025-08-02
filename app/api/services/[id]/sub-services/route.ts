@@ -19,12 +19,10 @@ function getAuthToken(request: Request): string | null {
 // Protected POST - create sub-service
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    // In Next.js 13+, we need to explicitly await the params
-    const resolvedParams = await Promise.resolve(params);
-    const { id } = resolvedParams;
     
     if (!id) {
       console.error('[SUBSERVICE-POST] Error: Service ID is required');
@@ -135,12 +133,10 @@ export async function POST(
 // Protected PUT - update sub-service
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string; subServiceId: string } }
+  { params }: { params: Promise<{ id: string; subServiceId: string }> }
 ) {
+  const { id, subServiceId } = await params;
   try {
-    // In Next.js 13+, we need to explicitly await the params
-    const resolvedParams = await Promise.resolve(params);
-    const { id, subServiceId } = resolvedParams;
     
     if (!id || !subServiceId) {
       return NextResponse.json(
@@ -213,12 +209,10 @@ export async function PUT(
 // Protected DELETE - delete sub-service
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string; subServiceId: string } }
+  { params }: { params: Promise<{ id: string; subServiceId: string }> }
 ) {
+  const { id, subServiceId } = await params;
   try {
-    // In Next.js 13+, we need to explicitly await the params
-    const resolvedParams = await Promise.resolve(params);
-    const { id, subServiceId } = resolvedParams;
     
     if (!id || !subServiceId) {
       return NextResponse.json(
