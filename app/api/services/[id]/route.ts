@@ -54,8 +54,9 @@ async function makeAuthenticatedRequest(
 // Update a service
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // In Next.js 13+, we need to explicitly await the params
     const resolvedParams = await Promise.resolve(params);
@@ -126,8 +127,9 @@ export async function PUT(
 // Delete a service
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // In Next.js 13+, we need to explicitly await the params
     const resolvedParams = await Promise.resolve(params);
@@ -244,8 +246,9 @@ export async function DELETE(
 // Handle sub-service operations
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // In Next.js 13+, we need to explicitly await the params
     const resolvedParams = await Promise.resolve(params);
