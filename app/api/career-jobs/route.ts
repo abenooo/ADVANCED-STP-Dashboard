@@ -14,31 +14,24 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const cookieHeader = request.headers.get("cookie") || "";
+  const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
+  const token = match ? match[2] : null;
+
+  if (!token) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
   const body = await request.json();
   const res = await fetch("https://advacned-tsp.onrender.com/api/career-jobs", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(body),
   });
+  
   const data = await res.json();
-  return NextResponse.json(data);
-}
-
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const body = await request.json();
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/career-jobs/${params.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
-}
-
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/career-jobs/${params.id}`, {
-    method: "DELETE",
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
+  return NextResponse.json(data, { status: res.status });
 }
