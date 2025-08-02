@@ -14,6 +14,7 @@ import { useTheme } from "@/components/theme-provider";
 import { useState, useEffect } from "react";
 import { useSearchParams } from 'next/navigation';
 import Dashboard from "./api/dashboard/page"
+import { performLogout } from "@/lib/utils/logout"
 
 export default function TacticalDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard")
@@ -129,9 +130,8 @@ export default function TacticalDashboard() {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    localStorage.removeItem("token")
-                   window.location.href = "/login"
+                  onClick={async () => {
+                    await performLogout()
                   }}
                   className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                 >

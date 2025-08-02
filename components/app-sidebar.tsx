@@ -4,6 +4,7 @@ import type * as React from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Briefcase, BookOpen, Calendar, Users, Package, Settings, LogOut, User, Home } from "lucide-react"
+import { performLogout } from "@/lib/utils/logout"
 
 import {
   Sidebar,
@@ -64,14 +65,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
-    // Clear token from localStorage or cookies
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token')
-      // Or if you're using cookies:
-      // document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-    }
-    // Redirect to login page and force a full page reload
-    window.location.href = '/login'
+    // Use comprehensive logout function
+    await performLogout()
   }
   return (
     <Sidebar {...props}>
