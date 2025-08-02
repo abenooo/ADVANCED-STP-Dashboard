@@ -20,14 +20,23 @@ export async function POST(request: NextRequest) {
   const token = data.token; // Adjust this if your backend returns a different field
 
   // Set the token in an HTTP-only cookie
-  const response = NextResponse.json({ success: true });
-  response.cookies.set("token", token, {
+  const response = NextResponse.json({ 
+    success: true, 
+    token: token, // Also return token in response for debugging
+    mustChangePassword: data.user?.mustChangePassword || false 
+  });
+  
+  // Set multiple cookie formats to ensure compatibility
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
-    maxAge: 60 * 60 * 24 * 1, // 1 week
-  });
+    maxAge: 60 * 60 * 24 * 7, // 7 days (1 week)
+  };
+  
+  response.cookies.set("token", token, cookieOptions);
+  response.cookies.set("access_token", token, cookieOptions); // Fallback cookie name
 
   return response;
 }

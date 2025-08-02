@@ -48,18 +48,19 @@ export function LoginForm() {
         description: "Login successful!",
       });
 
-      // Small delay to ensure cookie is set before redirect
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Longer delay to ensure cookies are properly set in production
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Redirect to dashboard after successful login
+      // Force a full page reload to ensure middleware recognizes authentication
       if (typeof window !== 'undefined') {
-        // Use router.push for better Next.js navigation
         const urlParams = new URLSearchParams(window.location.search);
         const from = urlParams.get('from');
         
         // Redirect to the originally requested page or dashboard
-        const redirectTo = from && from !== '/login' ? from : '/';
-        window.location.href = redirectTo;
+        const redirectTo = from && from !== '/login' && from !== '/' ? from : '/';
+        
+        // Use window.location.replace to prevent back button issues
+        window.location.replace(redirectTo);
       }
     } catch (err) {
       // Show error toast
