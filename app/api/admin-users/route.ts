@@ -56,51 +56,87 @@ export async function GET(request: Request) {
   }
 }
 
+// Generate random password function
+function generateRandomPassword(length: number = 8): string {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+}
+
 export async function POST(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
   const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
   const token = match ? match[2] : null;
-  
+
+  if (!token) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
   const body = await request.json();
+  
+  // Generate random password if not provided (for new users)
+  if (!body.password) {
+    body.password = generateRandomPassword(8);
+  }
+  
   const res = await fetch("https://advacned-tsp.onrender.com/api/admin-users", {
     method: "POST",
-    headers: { 
+    headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });
+  
   const data = await res.json();
-  return NextResponse.json(data);
+  
+  // If user creation was successful and we generated a password, send email
+  if (res.ok && !request.headers.get('x-skip-email')) {
+    try {
+      console.log('Attempting to send welcome email to:', body.email);
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-welcome-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "cookie": request.headers.get("cookie") || "", // Forward cookies for auth
+        },
+        body: JSON.stringify({
+          email: body.email,
+          name: body.name,
+          password: body.password,
+          role: body.role
+        }),
+      });
+      
+      console.log('Email API response status:', emailResponse.status);
+      
+      if (!emailResponse.ok) {
+        const emailError = await emailResponse.text();
+        console.error('Email API error response:', emailError);
+        
+        // Add the email error to the response so frontend can show it
+        return NextResponse.json({
+          ...data,
+          emailWarning: `User created successfully, but welcome email failed to send. Email API returned: ${emailResponse.status} - ${emailError}`
+        }, { status: res.status });
+      } else {
+        console.log('Welcome email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      
+      // Add the email error to the response so frontend can show it
+      return NextResponse.json({
+        ...data,
+        emailWarning: `User created successfully, but welcome email failed to send. Error: ${emailError instanceof Error ? emailError.message : String(emailError)}`
+      }, { status: res.status });
+    }
+  }
+  
+  return NextResponse.json(data, { status: res.status });
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const cookieHeader = request.headers.get("cookie") || "";
-  const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
-  const token = match ? match[2] : null;
-  
-  const body = await request.json();
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
-    method: "PUT",
-    headers: { 
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
-}
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const cookieHeader = request.headers.get("cookie") || "";
-  const match = cookieHeader.match(/(?:^|;\s*)(token|access_token)=([^;]*)/);
-  const token = match ? match[2] : null;
-  
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
-    method: "DELETE",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
-}
