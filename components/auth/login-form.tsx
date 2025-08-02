@@ -40,15 +40,26 @@ export function LoginForm() {
         throw new Error(errorData.message || 'Login failed');
       }
 
+      const data = await res.json();
+      
       // Show success toast
       toast({
         title: "Success",
         description: "Login successful!",
       });
 
+      // Small delay to ensure cookie is set before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Redirect to dashboard after successful login
       if (typeof window !== 'undefined') {
-        window.location.href = "/?section=dashboard";
+        // Use router.push for better Next.js navigation
+        const urlParams = new URLSearchParams(window.location.search);
+        const from = urlParams.get('from');
+        
+        // Redirect to the originally requested page or dashboard
+        const redirectTo = from && from !== '/login' ? from : '/';
+        window.location.href = redirectTo;
       }
     } catch (err) {
       // Show error toast
