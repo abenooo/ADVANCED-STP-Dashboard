@@ -23,8 +23,8 @@ import {
 export interface UserFormData {
   name: string;
   email: string;
-  password: string;
-  role: string;
+  password?: string; // Optional since we'll generate it automatically for new users
+  role: 'super_admin' | 'admin' | 'marketing';
 }
 
 interface UserFormProps {
@@ -40,7 +40,7 @@ export function UserForm({ open, onOpenChange, onSubmit, initialData, isSubmitti
     name: '',
     email: '',
     password: '',
-    role: 'staff',
+    role: 'marketing',
   });
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export function UserForm({ open, onOpenChange, onSubmit, initialData, isSubmitti
   const handleSelectChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      role: value
+      role: value as 'super_admin' | 'admin' | 'marketing'
     }));
   };
 
@@ -82,7 +82,7 @@ export function UserForm({ open, onOpenChange, onSubmit, initialData, isSubmitti
             <DialogDescription>
               {initialData?.email 
                 ? 'Update the user details below.'
-                : 'Enter the details for the new staff member.'}
+                : 'Enter the details for the new staff member. A random password will be generated and sent to their email.'}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -114,21 +114,23 @@ export function UserForm({ open, onOpenChange, onSubmit, initialData, isSubmitti
                 disabled={!!initialData?.email}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right">
-                {initialData?.email ? 'New Password' : 'Password'}
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="col-span-3"
-                required={!initialData?.email}
-                placeholder={initialData?.email ? 'Leave blank to keep current password' : ''}
-              />
-            </div>
+            {/* Only show password field for editing existing users */}
+            {initialData?.email && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="password" className="text-right">
+                  New Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password || ''}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  placeholder="Leave blank to keep current password"
+                />
+              </div>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="role" className="text-right">
                 Role
@@ -138,8 +140,9 @@ export function UserForm({ open, onOpenChange, onSubmit, initialData, isSubmitti
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
                 </SelectContent>
               </Select>
             </div>
