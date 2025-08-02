@@ -29,21 +29,5 @@ export async function POST(request: Request) {
   return NextResponse.json(data);
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const body = await request.json();
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
-}
-
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const res = await fetch(`https://advacned-tsp.onrender.com/api/admin-users/${params.id}`, {
-    method: "DELETE",
-  });
-  const data = await res.json();
-  return NextResponse.json(data);
-}
+// PUT and DELETE operations for specific users should be handled in dynamic routes like /api/user/[id]/route.ts
+// These functions have been removed as they don't belong in the main /api/user route
