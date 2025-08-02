@@ -60,6 +60,8 @@ export default function CareerJobsCrud() {
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -117,15 +119,24 @@ export default function CareerJobsCrud() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Delete this job?")) return;
+    setIsDeleting(true);
     try {
       await deleteCareerJob(id);
       await fetchJobs();
+      setIsDeleteDialogOpen(false);
+      setJobToDelete(null);
     } catch (error) {
       console.error('Error deleting job:', error);
       alert("Failed to delete job");
+    } finally {
+      setIsDeleting(false);
     }
   }
+
+  const handleDeleteClick = (job: Job) => {
+    setJobToDelete(job);
+    setIsDeleteDialogOpen(true);
+  };
 
   function resetForm() {
     setEditId(null);
@@ -309,6 +320,50 @@ export default function CareerJobsCrud() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Job Posting</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{jobToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setJobToDelete(null);
+              }}
+              disabled={isDeleting}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => jobToDelete && handleDelete(jobToDelete._id)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Job
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="space-y-4">
 
         {loading ? (
@@ -366,6 +421,18 @@ export default function CareerJobsCrud() {
                       >
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(job);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
                       </Button>
                     </div>
                   </div>
