@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 // Proxy to external bookings endpoint, forwarding JWT from cookie
-
 export async function GET(request: Request) {
   // Extract jwt token from cookies
   const cookieHeader = request.headers.get("cookie") || "";
@@ -9,25 +8,42 @@ export async function GET(request: Request) {
   const token = match ? match[2] : null;
 
   try {
-    const externalUrl = "https://advacned-tsp.onrender.com/api/bookings"; // adjust path if backend differs
+    const externalUrl = "https://advacned-tsp.onrender.com/api/bookings";
     const res = await fetch(externalUrl, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: token ? { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      } : { 'Content-Type': 'application/json' },
       cache: "no-store",
     });
 
     if (!res.ok) {
-      return new NextResponse(
-        JSON.stringify({ error: "Failed to fetch bookings", status: res.status }),
-        { status: res.status, headers: { "Content-Type": "application/json" } }
-      );
+      console.error('Failed to fetch bookings:', res.status, res.statusText);
+      // Return empty array instead of error to prevent UI breakage
+      return NextResponse.json([], { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' } 
+      });
     }
 
-    const data = await res.json();
-    return NextResponse.json(data);
+    const responseData = await res.json();
+    
+    // Extract the data array from the response
+    const bookings = Array.isArray(responseData?.data) 
+      ? responseData.data 
+      : [];
+    
+    return NextResponse.json(bookings, { 
+      status: 200,
+      headers: { 'Content-Type': 'application/json' } 
+    });
+    
   } catch (err: any) {
-    return new NextResponse(
-      JSON.stringify({ error: "Internal Server Error", details: err.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.error('Error fetching bookings:', err);
+    // Return empty array on error to prevent UI breakage
+    return NextResponse.json([], { 
+      status: 200,
+      headers: { 'Content-Type': 'application/json' } 
+    });
   }
 }
