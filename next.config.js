@@ -28,6 +28,20 @@ const nextConfig = {
         // Security headers for all pages
         source: '/(.*)',
         headers: [
+          // Only set CSP in production
+          ...(process.env.NODE_ENV === 'production' ? [{
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self';",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;",
+              "style-src 'self' 'unsafe-inline' https:;",
+              "img-src 'self' data: blob: https:;",
+              "font-src 'self' https:;",
+              "connect-src 'self' https:;",
+              "form-action 'self';",
+              "frame-ancestors 'none';"
+            ].join(' ')
+          }] : []),
           {
             key: 'X-Frame-Options',
             value: 'DENY'
@@ -39,29 +53,18 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
           }
         ]
       }
     ]
   },
 
-  // Redirects for better SEO and user experience
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/login',
-        permanent: false,
-        has: [
-          {
-            type: 'cookie',
-            key: 'token',
-            value: undefined
-          }
-        ]
-      }
-    ]
-  },
+  // REMOVE THE REDIRECTS SECTION - Let middleware handle authentication
+  // The redirect configuration was causing the infinite loop
 
   // Image optimization settings
   images: {
