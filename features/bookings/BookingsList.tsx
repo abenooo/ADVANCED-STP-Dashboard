@@ -63,8 +63,12 @@ export default function BookingsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
  // Update the formData state type to match the Booking status type
 const [formData, setFormData] = useState({
   customerName: '',
@@ -89,6 +93,7 @@ const [formData, setFormData] = useState({
 
   const fetchBookings = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/booking');
       if (!response.ok) {
         throw new Error('Failed to fetch bookings');
@@ -115,12 +120,12 @@ const [formData, setFormData] = useState({
   const handleEdit = (booking: Booking) => {
     setCurrentBooking(booking);
     setFormData({
-      customerName: booking.customerName,
-      customerEmail: booking.customerEmail,
-      customerPhone: booking.customerPhone,
-      task: booking.task,
-      date: booking.date.split('T')[0],
-      status: booking.status,
+      customerName: booking.customerName || '',
+      customerEmail: booking.customerEmail || '',
+      customerPhone: booking.customerPhone || '',
+      task: booking.task || '',
+      date: booking.date ? new Date(booking.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      status: booking.status || 'pending',
       notes: booking.notes || ''
     });
     setIsDialogOpen(true);
@@ -140,12 +145,17 @@ const [formData, setFormData] = useState({
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this booking?')) return;
-    
+  const handleDeleteClick = (booking: Booking) => {
+    setBookingToDelete(booking);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!bookingToDelete) return;
+
     try {
       setIsDeleting(true);
-      const response = await fetch(`/api/booking/${id}`, {
+      const response = await fetch(`/api/booking/${bookingToDelete._id}`, {
         method: 'DELETE',
       });
 
@@ -153,10 +163,12 @@ const [formData, setFormData] = useState({
         throw new Error('Failed to delete booking');
       }
 
-      setBookings(bookings.filter(booking => booking._id !== id));
+      await fetchBookings();
+      setIsDeleteDialogOpen(false);
+      setBookingToDelete(null);
     } catch (error) {
       console.error('Error deleting booking:', error);
-      alert('Failed to delete booking');
+      setError('Failed to delete booking. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -164,6 +176,8 @@ const [formData, setFormData] = useState({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     const method = currentBooking ? 'PUT' : 'POST';
     const url = currentBooking ? `/api/booking/${currentBooking._id}` : '/api/booking';
 
@@ -180,19 +194,28 @@ const [formData, setFormData] = useState({
         throw new Error(`Failed to ${currentBooking ? 'update' : 'create'} booking`);
       }
 
-      const data = await response.json();
-      
-      if (currentBooking) {
-        setBookings(bookings.map(b => b._id === currentBooking._id ? data : b));
-      } else {
-        setBookings([...bookings, data]);
-      }
-
+      await fetchBookings();
       setIsDialogOpen(false);
+      setCurrentBooking(null);
     } catch (error) {
       console.error(`Error ${currentBooking ? 'updating' : 'creating'} booking:`, error);
-      alert(`Failed to ${currentBooking ? 'update' : 'create'} booking`);
+      setError(`Failed to ${currentBooking ? 'update' : 'create'} booking. Please try again.`);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setCurrentBooking(null);
+    setFormData({
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      task: '',
+      date: new Date().toISOString().split('T')[0],
+      status: 'pending',
+      notes: ''
+    });
   };
 
   if (loading) {
@@ -200,7 +223,22 @@ const [formData, setFormData] = useState({
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+    return (
+      <div className="space-y-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setError(null)}
+            className="absolute top-0 right-0 px-4 py-3"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <Button onClick={fetchBookings}>Try Again</Button>
+      </div>
+    );
   }
 
   return (
@@ -208,12 +246,28 @@ const [formData, setFormData] = useState({
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Bookings</h1>
-          <p className="text-muted-foreground">Manage all bookings and appointments</p>
+          <p className="text-muted-foreground">
+            {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'} found
+          </p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" /> New Booking
         </Button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setError(null)}
+            className="absolute top-0 right-0 px-4 py-3"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {bookings.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed rounded-lg">
@@ -240,9 +294,11 @@ const [formData, setFormData] = useState({
                       <Mail className="h-4 w-4" /> {booking.customerEmail}
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className={statusVariant[booking.status]}>
-                    {booking.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={statusVariant[booking.status]}>
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('-', ' ')}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-2">
@@ -259,37 +315,48 @@ const [formData, setFormData] = useState({
                     <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <p className="text-sm">{booking.task}</p>
                   </div>
-                </div>
-                <div className="mt-4 flex justify-between items-center pt-2 border-t">
-                  <div className="text-xs text-muted-foreground">
-                    Created: {new Date(booking.createdAt).toLocaleDateString()}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleEdit(booking)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(booking._id)}
-                      disabled={isDeleting}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {booking.notes && (
+                    <div className="flex items-start gap-2 mt-3 pt-2 border-t">
+                      <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <p className="text-sm text-muted-foreground">{booking.notes}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
+              <CardFooter className="flex justify-between items-center pt-0">
+                <div className="text-xs text-muted-foreground">
+                  Created: {new Date(booking.createdAt).toLocaleDateString()}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleEdit(booking)}
+                    title="Edit booking"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteClick(booking)}
+                    disabled={isDeleting}
+                    title="Delete booking"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </CardFooter>
             </Card>
           ))}
         </div>
       )}
 
+      {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -388,15 +455,83 @@ const [formData, setFormData] = useState({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDialogOpen(false)}
+                onClick={() => {
+                  setIsDialogOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting}
               >
+                <X className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
-              <Button type="submit">
-                {currentBooking ? 'Update Booking' : 'Create Booking'}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {currentBooking ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    {currentBooking ? (
+                      <>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Update Booking
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Booking
+                      </>
+                    )}
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Booking</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the booking for "{bookingToDelete?.customerName}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setBookingToDelete(null);
+              }}
+              disabled={isDeleting}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Booking
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
