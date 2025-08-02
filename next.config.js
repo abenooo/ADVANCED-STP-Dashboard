@@ -63,23 +63,23 @@ const nextConfig = {
     ]
   },
 
-  // REMOVE THE REDIRECTS SECTION - Let middleware handle authentication
-  // The redirect configuration was causing the infinite loop
-
   // Image optimization settings
   images: {
     domains: ['localhost'],
     formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
   },
 
   // Webpack configuration for better production builds
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Optimize bundle size in production
-    if (!dev && !isServer) {
-      config.optimization.splitChunks.chunks = 'all'
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't resolve 'fs' module on the client to prevent this error on build
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
     }
-    
-    return config
+    return config;
   },
 
   // Output configuration for static exports if needed
@@ -88,10 +88,10 @@ const nextConfig = {
   // Disable powered by header for security
   poweredByHeader: false,
 
-  // Compression for better performance
-  compress: true,
+  // Enable React Strict Mode
+  reactStrictMode: true,
 
-  // Generate source maps in production for debugging
+  // Enable production browser source maps (disable in production for better performance)
   productionBrowserSourceMaps: false,
 }
 
