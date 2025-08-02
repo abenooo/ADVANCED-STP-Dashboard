@@ -24,12 +24,13 @@ import { Textarea } from "@/components/ui/textarea";
 interface BlogPost {
   _id: string;
   title: string;
-  content: string;
   slug: string;
+  content: string;
   coverImageUrl?: string;
   tags?: string[];
   published?: boolean;
   publishedAt?: string;
+  author?: string;
   updatedAt?: string;
   createdAt?: string;
   __v?: number;
@@ -40,21 +41,39 @@ export default function BlogPostsCrud() {
   const [loading, setLoading] = useState<boolean>(true);
   const [formData, setFormData] = useState<{
     title: string;
-    content: string;
     slug: string;
+    content: string;
+    coverImageUrl?: string;
     tags?: string[];
+    published?: boolean;
   }>({
     title: "",
-    content: "",
     slug: "",
-    tags: []
+    content: "",
+    coverImageUrl: "",
+    tags: [],
+    published: false
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const tagsArray = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    setFormData(prev => ({ ...prev, tags: tagsArray }));
   };
 
   useEffect(() => {
@@ -83,15 +102,14 @@ export default function BlogPostsCrud() {
     try {
       const newPost: Omit<BlogPost, '_id'> = { 
         ...formData,
-        published: true,
-        publishedAt: new Date().toISOString(),
+        publishedAt: formData.published ? new Date().toISOString() : undefined,
         tags: formData.tags || []
       };
       const response = await createBlogPost(newPost);
       console.log('Create response:', response); // Debug log
       setIsDialogOpen(false);
       resetForm();
-      fetchPosts();
+      await fetchPosts();
     } catch (e) {
       console.error("Create error:", e);
       alert("Failed to create blog post: " + (e instanceof Error ? e.message : 'Unknown error'));
@@ -117,23 +135,34 @@ export default function BlogPostsCrud() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Delete this blog post?")) return;
+    setIsDeleting(true);
     try {
       await deleteBlogPost(id);
-      fetchPosts();
+      await fetchPosts();
+      setIsDeleteDialogOpen(false);
+      setPostToDelete(null);
     } catch (e) {
       console.error("Delete error:", e);
       alert("Failed to delete blog post");
+    } finally {
+      setIsDeleting(false);
     }
   }
+
+  const handleDeleteClick = (post: BlogPost) => {
+    setPostToDelete(post);
+    setIsDeleteDialogOpen(true);
+  };
 
   function startEdit(post: BlogPost) {
     setEditId(post._id);
     setFormData({
       title: post.title,
-      content: post.content,
       slug: post.slug,
-      ...(post.tags && { tags: post.tags })
+      content: post.content,
+      coverImageUrl: post.coverImageUrl || '',
+      tags: post.tags || [],
+      published: post.published || false
     });
     setIsDialogOpen(true);
   }
@@ -142,9 +171,11 @@ export default function BlogPostsCrud() {
     setEditId(null);
     setFormData({
       title: "",
-      content: "",
       slug: "",
-      tags: []
+      content: "",
+      coverImageUrl: "",
+      tags: [],
+      published: false
     });
   }
 
@@ -171,35 +202,65 @@ export default function BlogPostsCrud() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={editId ? handleUpdate : handleCreate} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">
+                  Title *
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Enter blog post title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">
+                  Slug *
+                </Label>
+                <Input
+                  id="slug"
+                  name="slug"
+                  placeholder="Enter URL-friendly slug"
+                  value={formData.slug}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="title">
-                Title
+              <Label htmlFor="coverImageUrl">
+                Cover Image URL
               </Label>
               <Input
-                id="title"
-                name="title"
-                placeholder="Enter blog post title"
-                value={formData.title}
+                id="coverImageUrl"
+                name="coverImageUrl"
+                placeholder="https://example.com/image.jpg"
+                value={formData.coverImageUrl || ''}
                 onChange={handleInputChange}
-                required
+                type="url"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="slug">
-                Slug
+              <Label htmlFor="tags">
+                Tags
               </Label>
               <Input
-                id="slug"
-                name="slug"
-                placeholder="Enter URL-friendly slug"
-                value={formData.slug}
-                onChange={handleInputChange}
-                required
+                id="tags"
+                name="tags"
+                placeholder="Enter tags separated by commas (e.g., technology, web, react)"
+                value={formData.tags?.join(', ') || ''}
+                onChange={handleTagsChange}
               />
+              <p className="text-xs text-muted-foreground">
+                Separate multiple tags with commas
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="content">
-                Content
+                Content *
               </Label>
               <Textarea
                 id="content"
@@ -210,6 +271,19 @@ export default function BlogPostsCrud() {
                 className="min-h-[300px]"
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="published"
+                name="published"
+                checked={formData.published || false}
+                onChange={handleInputChange}
+                className="rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label htmlFor="published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Publish immediately
+              </Label>
             </div>
             <DialogFooter>
               <Button
@@ -242,7 +316,49 @@ export default function BlogPostsCrud() {
         </DialogContent>
       </Dialog>
 
-
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Blog Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{postToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setPostToDelete(null);
+              }}
+              disabled={isDeleting}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => postToDelete && handleDelete(postToDelete._id)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Post
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Blog Posts List */}
       <div className="space-y-6">
@@ -318,7 +434,7 @@ export default function BlogPostsCrud() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(post._id)}
+                        onClick={() => handleDeleteClick(post)}
                       >
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Delete</span>
