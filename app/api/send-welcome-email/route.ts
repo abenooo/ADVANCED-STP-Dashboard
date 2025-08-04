@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     const roleDisplay = getRoleDisplayName(role);
     const companyName = process.env.COMPANY_NAME || 'Advanced TSP Services';
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const adminEmail = process.env.ADMIN_EMAIL; // Optional admin email for BCC
 
     // Create the email HTML content
     const emailHtml = `
@@ -137,13 +138,12 @@ This is an automated message. Please do not reply to this email.
     // Send the email using Resend
     const emailResult = await resend.emails.send({
       from: fromEmail,
-      to: email,
+      to: email,  // Send to the new user
+      ...(adminEmail && { bcc: adminEmail }),  // Conditionally add BCC if admin email is set
       subject: `Welcome to ${companyName} - Your Login Credentials`,
       html: emailHtml,
       text: emailText,
     });
-
-    console.log('Welcome email sent successfully:', emailResult);
 
     return NextResponse.json({
       success: true,
