@@ -58,11 +58,6 @@ const navItems = [
     url: "/blog",
     icon: BookOpen,
   },
-  {
-    title: "Services",
-    url: "/services",
-    icon: Settings,
-  },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -84,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon />
