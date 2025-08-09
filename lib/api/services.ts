@@ -207,10 +207,11 @@ export async function createSubService(serviceId: string, data: Partial<SubServi
   return response.json();
 }
 
-export async function updateSubService(serviceId: string, subServiceId: string, data: Partial<SubService>): Promise<SubService> {
-  const res = await fetch(`/api/services/${serviceId}/sub-services/${subServiceId}`, {
+export async function updateSubService(serviceId: string, subSlug: string, data: Partial<SubService>): Promise<SubService> {
+  const res = await fetch(`/api/services/${serviceId}/sub-services/${encodeURIComponent(subSlug)}`, {
     method: 'PUT',
     headers: {
+      'Content-Type': 'application/json',
       ...getAuthHeaders(),
     },
     body: JSON.stringify(data),
@@ -220,8 +221,8 @@ export async function updateSubService(serviceId: string, subServiceId: string, 
   return result
 }
 
-export async function deleteSubService(serviceId: string, subServiceId: string): Promise<void> {
-  const res = await fetch(`/api/services/${serviceId}/sub-services/${subServiceId}`, {
+export async function deleteSubService(serviceId: string, subSlug: string): Promise<void> {
+  const res = await fetch(`/api/services/${serviceId}/sub-services/${encodeURIComponent(subSlug)}`, {
     method: 'DELETE',
     headers: {
       ...getAuthHeaders(),

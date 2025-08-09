@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -41,11 +42,13 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
     setShowDeleteDialog(true)
   }
 
+  const getSubSlug = (sub: SubService) => sub.slug || sub.subServiceSlug || ""
+
   const handleSubmit = async (data: any) => {
     try {
       setIsSubmitting(true)
       if (editing) {
-        await updateSubService(serviceId, editing._id, data)
+        await updateSubService(serviceId, getSubSlug(editing), data)
         toast({ title: "Success", description: "Sub-service updated" })
       } else {
         await createSubService(serviceId, data)
@@ -64,7 +67,7 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
     if (!deleting) return
     try {
       setIsSubmitting(true)
-      await deleteSubService(serviceId, deleting._id)
+      await deleteSubService(serviceId, getSubSlug(deleting))
       toast({ title: "Deleted", description: "Sub-service deleted" })
       setShowDeleteDialog(false)
       setDeleting(null)
@@ -96,6 +99,9 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
                 {sub?.moto || (sub?.definition ? String(sub.definition).slice(0, 160) : "View details")}
               </p>
               <div className="flex gap-2">
+                <Link href={`/services/${serviceSlug}/sub-services/${getSubSlug(sub)}`}>
+                  <Button size="sm" variant="secondary">View</Button>
+                </Link>
                 <Button size="sm" onClick={() => onEdit(sub)}>Edit</Button>
                 <Button size="sm" variant="destructive" onClick={() => onDelete(sub)}>Delete</Button>
               </div>
