@@ -55,8 +55,8 @@ export default function ServiceActions({ service }: Props) {
 
   return (
     <div className="flex gap-2">
-      <Button size="sm" onClick={onEdit}>Edit</Button>
-      <Button size="sm" variant="destructive" onClick={onDelete}>Delete</Button>
+      <Button size="sm" onClick={onEdit} disabled={isSubmitting}>Edit</Button>
+      <Button size="sm" variant="destructive" onClick={onDelete} disabled={isSubmitting}>Delete</Button>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-2xl">
@@ -67,6 +67,7 @@ export default function ServiceActions({ service }: Props) {
             onSubmit={handleSubmit}
             onCancel={() => setShowForm(false)}
             initialData={service}
+            isSubmitting={isSubmitting}
           />
         </DialogContent>
       </Dialog>

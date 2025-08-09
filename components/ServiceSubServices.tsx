@@ -83,7 +83,9 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Sub-services</h2>
-        <Button onClick={onCreate}>Add Sub-service</Button>
+        <Button onClick={onCreate} disabled={isSubmitting}>
+          {isSubmitting ? "Please wait..." : "Add Sub-service"}
+        </Button>
       </div>
 
       {subServices.length === 0 ? (
@@ -100,10 +102,10 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
               </p>
               <div className="flex gap-2">
                 <Link href={`/services/${serviceSlug}/sub-services/${getSubSlug(sub)}`}>
-                  <Button size="sm" variant="secondary">View</Button>
+                  <Button size="sm" variant="secondary" disabled={isSubmitting}>View</Button>
                 </Link>
-                <Button size="sm" onClick={() => onEdit(sub)}>Edit</Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(sub)}>Delete</Button>
+                <Button size="sm" onClick={() => onEdit(sub)} disabled={isSubmitting}>Edit</Button>
+                <Button size="sm" variant="destructive" onClick={() => onDelete(sub)} disabled={isSubmitting}>Delete</Button>
               </div>
             </Card>
           ))}
@@ -119,6 +121,7 @@ export default function ServiceSubServices({ serviceId, serviceSlug, subServices
             onSubmit={handleSubmit}
             onCancel={() => setShowForm(false)}
             initialData={editing || {}}
+            isSubmitting={isSubmitting}
           />
         </DialogContent>
       </Dialog>
