@@ -57,6 +57,7 @@ export default function ContactsPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-muted-foreground">
               <tr>
+                <th className="p-2 w-12">#</th>
                 <th className="p-2">Name</th>
                 <th className="p-2">Email</th>
                 <th className="p-2">Company</th>
@@ -67,8 +68,9 @@ export default function ContactsPage() {
               </tr>
             </thead>
             <tbody>
-              {contacts.map((c) => (
+              {contacts.map((c, idx) => (
                 <tr key={c._id} className="border-t">
+                  <td className="p-2 text-muted-foreground">{idx + 1}</td>
                   <td className="p-2 whitespace-nowrap">{c.fullName}</td>
                   <td className="p-2 whitespace-nowrap">{c.email}</td>
                   <td className="p-2 whitespace-nowrap">{c.companyName || "-"}</td>
