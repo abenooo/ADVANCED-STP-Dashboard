@@ -104,13 +104,6 @@ export function LoginForm() {
                   This system is for authorized users only.<br/>
                   All activities are monitored and logged.
                 </p>
-                <p className="text-xs text-yellow-600 mt-2">
-                  🚨 Unauthorized access attempts are strictly prohibited and may result in legal action.<br/>
-                  We actively track IP addresses, login attempts, and user behavior.
-                </p>
-                <p className="text-xs font-medium text-yellow-700 mt-2">
-                  If you're not an authorized user, leave this page immediately.
-                </p>
               </div>
             </div>
           </div>
@@ -168,27 +161,6 @@ export function LoginForm() {
                 Login
               </Button>
             </form>
-            
-            <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-gray-300" />
-              <span className="text-xs text-gray-400">Or continue with</span>
-              <div className="h-px flex-1 bg-gray-300" />
-            </div>
-            
-            <Button
-              variant="default"
-              className="w-full flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800"
-            >
-              <ChromeIcon className="h-5 w-5" />
-              Login with Google
-            </Button>
-            
-            <p className="text-center text-sm text-gray-600">
-              Reset Password?{' '}
-              <Link href="#" className="underline text-black">
-                Reset Password
-              </Link>
-            </p>
           </div>
         </div>
       </div>
