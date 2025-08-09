@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { getServices, createService, updateService, deleteService, type Service, createSubService, updateSubService, deleteSubService, type SubService } from "@/lib/api/services"
 import ServiceForm from "@/components/ServiceForm"
 import SubServiceForm from "@/components/SubServiceForm"
+import Link from "next/link"
 import {
   Cloud,
   Server,
@@ -252,10 +253,8 @@ export default function ServicesPage() {
           <Card
             key={service._id}
             className={`
-              p-6 bg-card border border-border hover:border-orange-500 transition-colors relative group cursor-pointer
-              ${selectedServiceId === service._id ? 'border-orange-500' : ''}
+              p-6 bg-card border border-border hover:border-orange-500 transition-colors relative group
             `}
-            onClick={() => setSelectedServiceId(service._id)}
           >
             <CardHeader className="flex flex-col gap-2 p-0">
               <div className="flex justify-between items-center">
@@ -284,91 +283,20 @@ export default function ServicesPage() {
               >
                 Delete
               </Button>
+              {(service.slug || service.serviceSlug) ? (
+                <Link
+                  href={`/services/${service.slug || service.serviceSlug}`}
+                  className="inline-flex items-center rounded-md bg-orange-500 px-3 py-2 text-xs font-medium text-white hover:bg-orange-600"
+                >
+                  View Sub-services
+                </Link>
+              ) : (
+                <span className="text-xs text-muted-foreground">No slug available</span>
+              )}
               </div>
           </Card>
         ))}
       </div>
-
-      {/* Sub-services for selected service */}
-      {currentSelectedService && (
-        <div>
-          <h2 className="text-xl font-bold text-foreground mt-8 mb-4">
-            {currentSelectedService.name} - Sub Services
-          </h2>
-          {/* Update the Create Sub-service button */}
-          <Button className="mb-4" onClick={handleCreateSubService}>
-            Create Sub-service
-          </Button>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Handle both subService and subServices */}
-            {(currentSelectedService.subServices || currentSelectedService.subService || []).map(subService => (
-              <Card
-                key={subService._id}
-                className="p-6 bg-card border border-border hover:border-orange-500 transition-colors relative group"
-              >
-                <CardHeader className="p-0 mb-2">
-                  <div className="flex items-center gap-3 mb-4">
-                    {getIconForSubService(subService.subServiceName)}
-                    <div>
-                      <h3 className="font-semibold text-orange-500 dark:text-orange-400 text-lg mb-1">
-                        {subService.subServiceName}
-                      </h3>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4 p-0">
-                  <div className="bg-muted p-4 rounded-md">
-                    <h4 className="font-semibold text-foreground mb-2">Business Value</h4>
-                    <p className="text-sm text-muted-foreground mb-3">{subService.businessValue.businessValueDefinition}</p>
-                    <div className="space-y-2">
-                      {subService.businessValue.values.map((value) => (
-                        <div key={value._id} className="flex items-start gap-2">
-                          <span className="text-orange-500 mt-0.5">•</span>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{value.title}</p>
-                            <p className="text-xs text-muted-foreground">{value.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-muted p-4 rounded-md">
-                    <h4 className="font-semibold text-foreground mb-2">Organizational Needs</h4>
-                    <p className="text-sm text-muted-foreground mb-3">{subService.organizationNeed.organizationalDefinition}</p>
-                    <div className="space-y-2">
-                      {subService.organizationNeed.needs.map((need) => (
-                        <div key={need._id} className="flex items-start gap-2">
-                          <span className="text-orange-500 mt-0.5">•</span>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{need.title}</p>
-                            <p className="text-xs text-muted-foreground">{need.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {/* CRUD Buttons */}
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleEditSubService(subService)}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive" 
-                      onClick={() => handleDeleteSubService(subService)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Service Form Modal */}
       <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>

@@ -9,7 +9,7 @@ import ErrorBoundary from "@/components/ErrorBoundary"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Service Provider Advanced STP Dashboard",
+  title: "Service Provider Advanced Technology Solutions Dashboard",
   description: "A comprehensive dashboard for managing service provider operations.",
     generator: 'v0.dev'
 }

@@ -17,6 +17,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow public access to sub-service detail pages
+  // Pattern: /services/:id/sub-services/:subServiceId
+  const subServicePublicPattern = /^\/services\/[\w-]+\/sub-services\/[\w-]+$/
+  if (subServicePublicPattern.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // Get token from cookies
   const token = request.cookies.get('token')?.value || 
                request.cookies.get('access_token')?.value;

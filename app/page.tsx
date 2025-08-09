@@ -73,8 +73,9 @@ export default function TacticalDashboard() {
           <div>
             <div className="flex items-center justify-between mb-8">
               <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
-                <h1 className="text-orange-500 font-bold text-lg tracking-wider">ADVANCED STP</h1>
-                <p className="text-neutral-500 text-xs">v1.0.0</p>
+                <h1 className="text-orange-500 font-bold text-lg tracking-wider">ADVANCED TECHNOLOGY</h1>
+                <h1 className="text-orange-500 font-bold text-lg tracking-wider text-center">SOLUTIONS</h1>
+                <p className="text-neutral-500 text-xs text-center">v1.0.0</p>
               </div>
               <Button
                 variant="ghost"

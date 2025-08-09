@@ -1,11 +1,15 @@
 import { getAuthHeaders } from '@/lib/utils/auth';
 
 const BASE_URL = "/api/services"
+// For public GETs, use Render API directly as requested
+const PUBLIC_API_BASE = 'https://advacned-tsp.onrender.com/api'
 
 export interface Service {
   _id: string
   name: string
   slug: string
+  // Some API responses may use `serviceSlug` instead of `slug`
+  serviceSlug?: string
   description: string
   moto: string
   imageUrl: string
@@ -21,6 +25,8 @@ export interface SubService {
   _id: string
   subServiceName: string
   slug: string
+  // Some API responses may use `subServiceSlug` instead of `slug`
+  subServiceSlug?: string
   moto: string
   definition: string
   commitment: string
@@ -66,7 +72,7 @@ export interface ServicesResponse {
 
 // Public - no authentication required
 export async function getServices(): Promise<ServicesResponse> {
-  const res = await fetch(BASE_URL, { 
+  const res = await fetch(`${PUBLIC_API_BASE}/services`, { 
     cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
@@ -79,6 +85,60 @@ export async function getServices(): Promise<ServicesResponse> {
   }
   
   return res.json();
+}
+
+// Public - get service by slug (matches Express: GET /api/services/:slug)
+export async function getServiceBySlug(slug: string): Promise<{ success: boolean; data: Service }>{
+  // Call Render API directly (public GET)
+  const res = await fetch(`${PUBLIC_API_BASE}/services/${encodeURIComponent(slug)}`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to fetch service')
+  }
+  return res.json()
+}
+
+// Public - list sub-services for a service
+export async function getSubServices(serviceId: string): Promise<{ success: boolean; data: SubService[] }>{
+  const res = await fetch(`${BASE_URL}/${serviceId}/sub-services`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to fetch sub-services')
+  }
+  return res.json()
+}
+
+// Public - get a single sub-service by slugs (matches Express: GET /api/services/:serviceSlug/:subServiceSlug)
+export async function getSubServiceBySlugs(serviceSlug: string, subServiceSlug: string): Promise<{ success: boolean; data: { service: Service; subService: SubService } }>{
+  // Call Render API directly (public GET)
+  const res = await fetch(`${PUBLIC_API_BASE}/services/${encodeURIComponent(serviceSlug)}/${encodeURIComponent(subServiceSlug)}`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to fetch sub-service')
+  }
+  return res.json()
+}
+
+// Deprecated: id-based internal route kept for backward compatibility
+export async function getSubService(serviceId: string, subServiceId: string): Promise<{ success: boolean; data: SubService }>{
+  const res = await fetch(`${BASE_URL}/${serviceId}/sub-services/${subServiceId}`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to fetch sub-service')
+  }
+  return res.json()
 }
 
 // Protected - requires authentication
@@ -150,8 +210,8 @@ export async function createSubService(serviceId: string, data: Partial<SubServi
 export async function updateSubService(serviceId: string, subServiceId: string, data: Partial<SubService>): Promise<SubService> {
   const res = await fetch(`/api/services/${serviceId}/sub-services/${subServiceId}`, {
     method: 'PUT',
-    headers: { 
-      'Content-Type': 'application/json',
+    headers: {
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(data),
   })
@@ -163,6 +223,9 @@ export async function updateSubService(serviceId: string, subServiceId: string, 
 export async function deleteSubService(serviceId: string, subServiceId: string): Promise<void> {
   const res = await fetch(`/api/services/${serviceId}/sub-services/${subServiceId}`, {
     method: 'DELETE',
+    headers: {
+      ...getAuthHeaders(),
+    },
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'Failed to delete sub-service')
