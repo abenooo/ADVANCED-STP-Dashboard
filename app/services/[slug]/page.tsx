@@ -29,7 +29,7 @@ export default async function ServiceDetailPage({
 
   if (!service) {
     return (
-      <div className="p-6 space-y-4 max-w-5xl mx-auto">
+      <div className="space-y-4">
         <Link href="/services" className="text-orange-500 hover:underline">← Back to Services</Link>
         <h1 className="text-2xl font-semibold">Service</h1>
         <p className="text-red-500">Failed to load service. {primaryError?.message || "Not found"}</p>
@@ -40,7 +40,7 @@ export default async function ServiceDetailPage({
   const subServices = service?.subServices || service?.subService || []
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/services" className="text-orange-500 hover:underline">← Back to Services</Link>
       </div>

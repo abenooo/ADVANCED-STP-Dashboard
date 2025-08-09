@@ -17,8 +17,8 @@ export default async function SubServiceDetailPage({
     sub = data?.subService ?? data
   } catch (e: any) {
     return (
-      <div className="p-6 space-y-4">
-        <Link href="/" className="text-orange-500 hover:underline">← Back</Link>
+      <div className="space-y-4">
+        <Link href="/services" className="text-orange-500 hover:underline">← Back to Services</Link>
         <h1 className="text-2xl font-semibold">Sub-service</h1>
         <p className="text-red-500">Failed to load sub-service. {e?.message || 'Unknown error'}</p>
       </div>
@@ -26,9 +26,9 @@ export default async function SubServiceDetailPage({
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Link href="/" className="text-orange-500 hover:underline">← Back</Link>
+        <Link href="/services" className="text-orange-500 hover:underline">← Back to Services</Link>
       </div>
 
       <header className="space-y-2">

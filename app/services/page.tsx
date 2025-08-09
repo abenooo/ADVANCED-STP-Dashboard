@@ -241,7 +241,7 @@ export default function ServicesPage() {
   const currentSelectedService = services.find(s => s._id === selectedServiceId)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Create Service Button */}
       <Button className="mb-4" onClick={handleCreateService}>
         Create Service
