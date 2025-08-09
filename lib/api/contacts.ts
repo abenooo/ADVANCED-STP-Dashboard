@@ -18,19 +18,31 @@ export interface ContactsResponse {
   count?: number
 }
 
+export async function updateContactStatus(id: string, status: 'new' | 'reviewed' | 'contacted' | 'archived') {
+  const res = await fetch(`/api/contacts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.message || 'Failed to update contact')
+  return data
+}
+
+export async function deleteContact(id: string) {
+  const res = await fetch(`/api/contacts/${id}`, { method: 'DELETE' })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.message || 'Failed to delete contact')
+  return data
+}
 // Use Next API proxy which attaches Authorization from cookies/header
 export async function getContacts(): Promise<ContactsResponse> {
   const res = await fetch('/api/contacts', {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',
   })
   const data = await res.json()
-  if (!res.ok) {
-    throw new Error(data?.message || 'Failed to fetch contacts')
-  }
-  // Backend returns { success, data: Contact[] } typically
+  if (!res.ok) throw new Error(data?.message || 'Failed to fetch contacts')
   return data
 }
