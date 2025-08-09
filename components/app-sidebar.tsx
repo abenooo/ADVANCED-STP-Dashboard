@@ -34,6 +34,16 @@ const navItems = [
     icon: Briefcase,
   },
   {
+    title: "Services",
+    url: "/services",
+    icon: Settings,
+  },
+  {
+    title: "Carrier",
+    url: "/carrier",
+    icon: Package,
+  },
+  {
     title: "Booking",
     url: "/booking",
     icon: Calendar,
@@ -42,11 +52,6 @@ const navItems = [
     title: "User",
     url: "/user",
     icon: Users,
-  },
-  {
-    title: "Carrier",
-    url: "/carrier",
-    icon: Package,
   },
   {
     title: "Blog",

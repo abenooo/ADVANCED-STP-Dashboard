@@ -9,6 +9,7 @@ import CarrierPage from "./carrier/page"
 import BlogPage from "./blog/page"
 import ServicesPage from "./services/page"
 import AdminUsersPage from "./admin/users/page"
+import ContactsPage from "./contacts/page"
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
 import { useState, useEffect } from "react";
@@ -97,6 +98,7 @@ export default function TacticalDashboard() {
                 { id: "carrier", icon: Users, label: "CARRIER" },
                 { id: "blog", icon: FileText, label: "BLOG" },
                 { id: "services", icon: Settings, label: "SERVICES" },
+                { id: "contacts", icon: Users, label: "CONTACTS" },
                 { id: "admin-users", icon: User, label: "ADMIN USERS" },
               ].map((item) => (
                 <button
@@ -156,7 +158,7 @@ export default function TacticalDashboard() {
         <div className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              ADMIN USERS
+              {formatSectionName(activeSection)}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -193,6 +195,7 @@ export default function TacticalDashboard() {
           {activeSection === "carrier" && <CarrierPage />}
           {activeSection === "blog" && <BlogPage />}
           {activeSection === "services" && <ServicesPage />}
+          {activeSection === "contacts" && <ContactsPage />}
           {activeSection === "admin-users" && <AdminUsersPage />}
           
         </div>
