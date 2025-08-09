@@ -5,14 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChromeIcon } from "@/components/icons";
 import { useToast } from "@/components/ui/use-toast";
 import adminImage from "@/public/admin.jpg";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,6 +30,7 @@ export function LoginForm() {
     }
 
     try {
+      setLoading(true);
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,6 +71,8 @@ export function LoginForm() {
         title: "Error",
         description: err instanceof Error ? err.message : 'An error occurred during login',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,8 +161,20 @@ export function LoginForm() {
                 )}
               </div>
               
-              <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800">
-                Login
+              <Button
+                type="submit"
+                disabled={loading}
+                aria-busy={loading}
+                className="w-full bg-black text-white hover:bg-gray-800 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Logging in...
+                  </span>
+                ) : (
+                  "Login"
+                )}
               </Button>
             </form>
           </div>
