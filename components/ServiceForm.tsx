@@ -65,6 +65,18 @@ const ServiceForm = ({
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required'
     }
+
+    if (!formData.moto.trim()) {
+      newErrors.moto = 'Tagline (moto) is required'
+    }
+
+    if (!formData.icon.trim()) {
+      newErrors.icon = 'Icon is required'
+    }
+
+    if (!formData.imageUrl.trim()) {
+      newErrors.imageUrl = 'Image URL is required'
+    }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -110,7 +122,7 @@ const ServiceForm = ({
   }
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">
           {initialData._id ? "Edit Service" : "Add New Service"}
@@ -126,18 +138,18 @@ const ServiceForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name Field */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Tag className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="name">Service Name</Label>
+                <Label htmlFor="name" className="w-40 shrink-0 text-right">Service Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g., Cloud Computing"
+                  className={`flex-1 ${errors.name ? 'border-red-500' : ''}`}
+                />
               </div>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="e.g., Cloud Computing"
-                className={errors.name ? 'border-red-500' : ''}
-              />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name}</p>
               )}
@@ -145,18 +157,18 @@ const ServiceForm = ({
 
             {/* Slug Field */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="slug">URL Slug</Label>
+                <Label htmlFor="slug" className="w-40 shrink-0 text-right">URL Slug</Label>
+                <Input
+                  id="slug"
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleSlugChange}
+                  placeholder="e.g., cloud-computing"
+                  className={`flex-1 ${errors.slug ? 'border-red-500' : ''}`}
+                />
               </div>
-              <Input
-                id="slug"
-                name="slug"
-                value={formData.slug}
-                onChange={handleSlugChange}
-                placeholder="e.g., cloud-computing"
-                className={errors.slug ? 'border-red-500' : ''}
-              />
               {errors.slug && (
                 <p className="text-sm text-red-500">{errors.slug}</p>
               )}
@@ -164,61 +176,75 @@ const ServiceForm = ({
 
             {/* Moto Field */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <span className="text-muted-foreground">📝</span>
-                <Label htmlFor="moto">Tagline</Label>
+                <Label htmlFor="moto" className="w-40 shrink-0 text-right">Tagline</Label>
+                <Input
+                  id="moto"
+                  name="moto"
+                  value={formData.moto}
+                  onChange={handleChange}
+                  placeholder="A short tagline for the service"
+                  required
+                  className="flex-1"
+                />
               </div>
-              <Input
-                id="moto"
-                name="moto"
-                value={formData.moto}
-                onChange={handleChange}
-                placeholder="A short tagline for the service"
-              />
+              {errors.moto && (
+                <p className="text-sm text-red-500">{errors.moto}</p>
+              )}
             </div>
 
             {/* Icon Field */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <span className="text-muted-foreground">🎨</span>
-                <Label htmlFor="icon">Icon Name</Label>
+                <Label htmlFor="icon" className="w-40 shrink-0 text-right">Icon Name</Label>
+                <Input
+                  id="icon"
+                  name="icon"
+                  value={formData.icon}
+                  onChange={handleChange}
+                  placeholder="e.g., cloud, server, database"
+                  required
+                  className="flex-1"
+                />
               </div>
-              <Input
-                id="icon"
-                name="icon"
-                value={formData.icon}
-                onChange={handleChange}
-                placeholder="e.g., cloud, server, database"
-              />
+              {errors.icon && (
+                <p className="text-sm text-red-500">{errors.icon}</p>
+              )}
             </div>
           </div>
 
           {/* Image URL Field */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <ImageIcon className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="imageUrl">Image URL</Label>
+              <Label htmlFor="imageUrl" className="w-40 shrink-0 text-right">Image URL</Label>
+              <div className="flex gap-2 flex-1">
+                <Input
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1"
+                  required
+                />
+                {formData.imageUrl && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Input
-                id="imageUrl"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                className="flex-1"
-              />
-              {formData.imageUrl && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            {errors.imageUrl && (
+              <p className="text-sm text-red-500">{errors.imageUrl}</p>
+            )}
             {formData.imageUrl && (
               <div className="mt-2 rounded-md overflow-hidden max-w-xs">
                 <img 
@@ -236,19 +262,19 @@ const ServiceForm = ({
 
           {/* Description Field */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="description">Description</Label>
+            <div className="flex items-start gap-3">
+              <FileText className="h-4 w-4 text-muted-foreground mt-2" />
+              <Label htmlFor="description" className="w-40 shrink-0 text-right mt-2">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Detailed description of the service..."
+                rows={5}
+                className={`flex-1 ${errors.description ? 'border-red-500' : ''}`}
+              />
             </div>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Detailed description of the service..."
-              rows={5}
-              className={errors.description ? 'border-red-500' : ''}
-            />
             {errors.description && (
               <p className="text-sm text-red-500">{errors.description}</p>
             )}

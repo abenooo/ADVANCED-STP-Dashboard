@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { getServiceBySlug, getServices } from "@/lib/api/services"
+import ServiceSubServices from "@/components/ServiceSubServices"
+import ServiceActions from "@/components/ServiceActions"
 
 // Server component to render sub-services for a single service
 // Next.js 15 requires awaiting params
@@ -46,38 +48,16 @@ export default async function ServiceDetailPage({
       </div>
 
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">{service?.name}</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold text-foreground">{service?.name}</h1>
+          <ServiceActions service={service} />
+        </div>
         {service?.description && (
           <p className="text-sm text-muted-foreground">{service.description}</p>
         )}
       </header>
 
-      <div className="flex items-center justify-between mt-6">
-        <h2 className="text-xl font-semibold">Sub-services</h2>
-      </div>
-
-      {subServices.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No sub-services yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {subServices.map((sub: any) => (
-            <div key={sub._id} className="p-6 bg-card border border-border rounded-md">
-              <div className="mb-3">
-                <h3 className="font-semibold text-orange-500 text-lg">{sub.subServiceName}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {sub?.moto || (sub?.definition ? String(sub.definition).slice(0, 160) : "View details")}
-              </p>
-              <Link
-                href={`/services/${slug}/sub-services/${sub.slug || sub.subServiceSlug || sub._id}`}
-                className="inline-flex items-center rounded-md bg-orange-500 px-3 py-2 text-xs font-medium text-white hover:bg-orange-600"
-              >
-                View
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+      <ServiceSubServices serviceId={service._id} serviceSlug={slug} subServices={subServices} />
     </div>
   )
 }
